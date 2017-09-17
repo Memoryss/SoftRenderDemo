@@ -1,7 +1,7 @@
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-#include <math.h>
+#include <cmath>
 
 namespace SoftRenderer {
 

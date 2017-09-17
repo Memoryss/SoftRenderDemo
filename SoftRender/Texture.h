@@ -5,12 +5,18 @@
 
 namespace SoftRenderer {
 
-    enum class TextureFormat
+    enum TextureFormat
     {
         TF_NONE = 0,
         TF_BGR24,
         TF_DEPTH16,
     };
+
+	enum PixelSize
+	{
+		PS_24 = 24,
+		PS_32 = 32,
+	};
 
     class Texture
     {
@@ -21,15 +27,17 @@ namespace SoftRenderer {
 
         bool LoadTexture(const char *textureFileName);
 
-        void Create(int width, int height, int format);
+		void CreateTexture(int width, int height, TextureFormat format);
 
+		//最近点过滤
         void GetColorNearest(float s, float t, vec3 &color);
+		//双线性过滤
         void GetColorBilinear(float s, float t, vec3 &color);
 
         float GetShadowNearest(vec4 &texcoord);
         float GetShadowBilinear(vec4 &texcoord);
 
-        void Destory();
+        void Clear();
 
         int GetWidth() const;
         int GetHeight() const;

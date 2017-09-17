@@ -139,11 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="type.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
