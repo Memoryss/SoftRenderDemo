@@ -39,6 +39,12 @@
     <ClInclude Include="SoftwareRenderAPI.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SoftwareRenderState.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftwareRenderWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Texture.cpp">
@@ -57,6 +63,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SoftwareRenderAPI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftwareRenderState.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftwareRenderWnd.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

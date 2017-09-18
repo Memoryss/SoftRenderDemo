@@ -10,20 +10,6 @@ namespace SoftRenderer
     class Texture;
     class Vertex;
 
-
-    enum AntiAliasingType
-    {
-        AAT_2X2 = 0,
-        AAT_3X3,
-        AAT_4X4,
-    };
-
-    enum CullFaceType
-    {
-        CFT_FRONT = 0,
-        CFF_BACK,
-    };
-
     class SoftwareRenderAPI
     {
     public:
@@ -32,54 +18,50 @@ namespace SoftRenderer
 
 
     private:
-        int m_width;
-        int m_height;
+		int m_width{ 0 };
+		int m_height{ 0 };
 
-        int m_viewportX;
-        int m_viewportY;
-        int m_viewportWidth;
-        int m_vewportHeight;
+		int m_viewportX{ 0 };
+		int m_viewportY{ 0 };
+		int m_viewportWidth{ 0 };
+		int m_viewportHeight{ 0 };
 
-        BYTE *m_antiAliasingColorBuffer;
-        int m_antiAliasingColorBufferWidth;
-        int m_m_antiAliasingColorBufferHeight;
+		BYTE *m_antiAliasingColorBuffer{ NULL };
+		int m_antiAliasingColorBufferWidth{ 0 };
+		int m_antiAliasingColorBufferHeight{ 0 };
 
-        BYTE *m_standardColorBuffer;
-        int m_standardColorBufferWidth;
-        int m_standardColorBufferHeight;
+		BYTE *m_standardColorBuffer{ NULL };
+		int m_standardColorBufferWidth{ 0 };
+		int m_standardColorBufferHeight{ 0 };
 
         BITMAPINFO m_bitmap;
 
-        BYTE *m_standardDepthBuffer;
-        int m_standardDepthBufferWidth;
-        int m_standardDepthBufferHeight;
+		BYTE *m_standardDepthBuffer{ NULL };
+		int m_standardDepthBufferWidth{ 0 };
+		int m_standardDepthBufferHeight{ 0 };
 
-        BYTE *m_depthBuffer;
-        int m_depthBufferWidth;
-        int m_depthBufferHeight;
+		BYTE *m_depthBuffer{ NULL };
+		int m_depthBufferWidth{ 0 };
+		int m_depthBufferHeight{ 0 };
 
-        BYTE *m_colorBuffer;
-        int m_colorBufferWidth;
-        int m_colorBufferHeight;
+		BYTE *m_colorBuffer{ NULL };
+		int m_colorBufferWidth{ 0 };
+		int m_colorBufferHeight{ 0 };
 
-        FrameBuffer *m_frameBuffer;
+		FrameBuffer *m_frameBuffer{ NULL };
 
-        AntiAliasingType m_aniAliasingType;
+		mat4x4 m_mvpMatrix{ mat4x4(1.f) };
+		mat4x4 m_shadowMapMatrix{ mat4x4(1.f) };
 
-        mat4x4 m_mvpMatrix;
-        mat4x4 m_shadowMapMatrix;
+		Light *m_light{ NULL };
 
-        Light *m_light;
+		bool m_bilinearTextureFiltering{ true };
+		bool m_depthTest{ false };
 
-        CullFaceType m_cullFaceType;
+        Texture *m_texture{ NULL };
+		Texture *m_shadowMap{ NULL };
 
-        bool m_bilinearTextureFiltering;
-        bool m_depthTest;
-
-        Texture *m_texture;
-        Texture *m_shadowMap;
-
-        Vertex *m_vertices;
+		Vertex *m_vertices{ NULL };
     };
 }
 
