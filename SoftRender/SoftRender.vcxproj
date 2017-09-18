@@ -141,13 +141,18 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="SoftwareRenderAPI.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="SoftwareRenderAPI.cpp" />
     <ClCompile Include="type.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
