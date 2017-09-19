@@ -2,6 +2,7 @@
 #define __TYPE_H__
 
 #include <cmath>
+#include <string>
 
 namespace SoftRenderer {
 
@@ -223,6 +224,9 @@ namespace SoftRenderer {
 
     void GetXY(const vec3 &Z, vec3 &X, vec3 &Y);
     mat3x3 GetTBNMatrix(const vec3 &N);
+
+    void StrToWstr(const std::string &src, std::wstring &dest);
+    void WstrToStr(const std::wstring &src, std::string &dest);
 }
 
 #endif

@@ -14,6 +14,13 @@ namespace SoftRenderer
         vec3 m_normal;
     };
 
+    struct Triangle
+    {
+        vec4 m_positions[3];
+        vec3 m_colors[3];
+        vec3 m_texcoord[3];
+    };
+
     class Object
     {
     public:

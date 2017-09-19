@@ -1,21 +1,39 @@
-#ifndef __SOFTWARE_RENDER_API_H__
-#define __SOFTWARE_RENDER_API_H__
+#ifndef __SOFTWARE_RENDER_H__
+#define __SOFTWARE_RENDER_H__
 
 #include "type.h"
+#include "Light.h"
+#include "Object.h"
+#include "Camera.h"
 
 namespace SoftRenderer
 {
     class FrameBuffer;
-    class Light;
     class Texture;
     class Vertex;
 
-    class SoftwareRenderAPI
+    class SoftwareRender
     {
     public:
-        SoftwareRenderAPI();
-        ~SoftwareRenderAPI();
+        SoftwareRender();
+        ~SoftwareRender();
 
+        //初始场景
+        bool InitScene();
+
+        void Render(float frameTime);
+        void Resize(int width, int height);
+        void Clear();
+
+        void SetMVPMatrix(mat4x4 matrix);
+
+        void SetLight(const Light &light);
+
+        void DrawTriangles(Vertex *vertices, int index, int count);
+
+        void ClipTriangle(Triangle &triangle);
+
+        //处理事件
 
     private:
 		int m_width{ 0 };
@@ -53,7 +71,7 @@ namespace SoftRenderer
 		mat4x4 m_mvpMatrix{ mat4x4(1.f) };
 		mat4x4 m_shadowMapMatrix{ mat4x4(1.f) };
 
-		Light *m_light{ NULL };
+		Light *m_light;
 
 		bool m_bilinearTextureFiltering{ true };
 		bool m_depthTest{ false };
@@ -62,6 +80,10 @@ namespace SoftRenderer
 		Texture *m_shadowMap{ NULL };
 
 		Vertex *m_vertices{ NULL };
+
+        Object m_object;
+
+        Camera m_camera;
     };
 }
 

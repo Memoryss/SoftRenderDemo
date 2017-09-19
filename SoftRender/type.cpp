@@ -1,5 +1,7 @@
 #include "type.h"
 
+#include <windows.h>
+
 namespace SoftRenderer
 {
 
@@ -769,4 +771,20 @@ namespace SoftRenderer
 
         return inverse(mat3x3(T, B, N));
     }
+
+    void StrToWstr(const std::string &src, std::wstring &dest)
+    {
+        int len = src.length();
+        dest.resize(len, L' ');
+
+        MultiByteToWideChar(CP_ACP, 0, (LPCSTR)src.c_str(), len, (LPWSTR)dest.c_str(), len);
+    }
+
+    void WstrToStr(const std::wstring &src, std::string &dest)
+    {
+        int len = src.length();
+        dest.resize(len, ' ');
+        WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)src.c_str(), len, (LPSTR)dest.c_str(), len, NULL, NULL);
+    }
+
 }

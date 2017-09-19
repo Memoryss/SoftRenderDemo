@@ -144,7 +144,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="SoftwareRenderAPI.h" />
+    <ClInclude Include="SoftwareRender.h" />
     <ClInclude Include="SoftwareRenderState.h" />
     <ClInclude Include="SoftwareRenderWnd.h" />
     <ClInclude Include="type.h" />
@@ -155,7 +155,7 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="SoftwareRenderWnd.cpp" />
-    <ClCompile Include="SoftwareRenderAPI.cpp" />
+    <ClCompile Include="SoftwareRender.cpp" />
     <ClCompile Include="SoftwareRenderState.cpp" />
     <ClCompile Include="type.cpp" />
     <ClCompile Include="Texture.cpp" />
