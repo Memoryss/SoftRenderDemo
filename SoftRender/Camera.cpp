@@ -4,12 +4,6 @@ namespace SoftRenderer
 {
 	Camera::Camera()
 	{
-		m_x = vec3(1.f, 0.f, 0.f);
-		m_y = vec3(0.f, 1.f, 0.f);
-		m_z = vec3(0.f, 0.f, 1.f);
-
-		m_position = vec3(0.f, 0.f, 5.f);
-
 		calculateViewMatrix();
 	}
 
@@ -18,9 +12,22 @@ namespace SoftRenderer
 
 	}
 
-	void Camera::Look()
+	void Camera::Look(const vec3 &eye, const vec3 &center, const vec3 &up)
 	{
-		//TODO
+        //构造n
+        vec3 temp = center - eye;
+        m_n = normalize(temp);
+
+        //构建u
+        vec3 u = normalize(up);
+        temp = cross(m_n, u);
+        m_u = normalize(temp);
+
+        //构建v
+        temp = cross(m_u, m_n);
+        m_v = normalize(temp);
+
+        calculateViewMatrix();
 	}
 
 	void Camera::Move(const vec3 &targetPos)
@@ -37,7 +44,7 @@ namespace SoftRenderer
 
 	void Camera::calculateViewMatrix()
 	{
-		m_viewMatrix = mat4x4(m_x.x, m_y.x, m_z.x, 0.f, m_x.y, m_y.y, m_z.y, 0.f, m_x.z, m_y.z, m_z.z, 0.f, -dot(m_x, m_position), -dot(m_z, m_position), -dot(m_z, m_position), 1.f);
+		m_viewMatrix = mat4x4(m_u.x, m_v.x, m_n.x, 0.f, m_u.y, m_v.y, m_n.y, 0.f, m_u.z, m_v.z, m_n.z, 0.f, -dot(m_u, m_position), -dot(m_v, m_position), -dot(m_n, m_position), 1.f);
 		m_viewPorjectMatrix = m_projectMatrix * m_viewMatrix;
 	}
 

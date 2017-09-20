@@ -5,6 +5,7 @@
 #include "Light.h"
 #include "Object.h"
 #include "Camera.h"
+#include "SoftwareRenderState.h"
 
 namespace SoftRenderer
 {
@@ -15,25 +16,41 @@ namespace SoftRenderer
     class SoftwareRender
     {
     public:
-        SoftwareRender();
+        SoftwareRender(HWND hwnd, int w, int h);
         ~SoftwareRender();
 
-        //初始场景
-        bool InitScene();
-
-        void Render(float frameTime);
         void Resize(int width, int height);
-        void Clear();
 
-        void SetMVPMatrix(mat4x4 matrix);
+        void Clear(const vec3 &color = vec3(0.f, 0.f, 0.f), float depth = 1.f);
 
-        void SetLight(const Light &light);
+        void SetWorldMatrix(const mat4x4 &m);
 
-        void DrawTriangles(Vertex *vertices, int index, int count);
+        void SetViewMatrix(const mat4x4 &m);
 
-        void ClipTriangle(Triangle &triangle);
+        void SetProjMatrix(const mat4x4 &m);
 
-        //处理事件
+        void SetCamera(Camera *cam);
+
+        void SetLight(Light *light);
+
+        void SetTexture(Texture *texture);
+
+        void SetRenderState(const SoftwareRenderState &state);
+
+        void Render();
+
+        void Begin();
+
+        void End();
+
+        void Present();
+
+    protected:
+        void rasterizePoint();
+
+        void rasterizeLine();
+
+        void rasterizeTriangle();
 
     private:
 		int m_width{ 0 };
@@ -83,7 +100,9 @@ namespace SoftRenderer
 
         Object m_object;
 
-        Camera m_camera;
+        Camera *m_camera;
+
+        SoftwareRenderState m_renderState;
     };
 }
 

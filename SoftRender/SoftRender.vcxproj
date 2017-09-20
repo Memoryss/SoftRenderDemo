@@ -139,23 +139,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="IFile.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SoftwareRender.h" />
+    <ClInclude Include="SoftwareRenderContext.h" />
     <ClInclude Include="SoftwareRenderState.h" />
-    <ClInclude Include="SoftwareRenderWnd.h" />
+    <ClInclude Include="SoftwareRenderApp.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="IFile.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="SoftwareRenderWnd.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="SoftwareRenderApp.cpp" />
     <ClCompile Include="SoftwareRender.cpp" />
+    <ClCompile Include="SoftwareRenderContext.cpp" />
     <ClCompile Include="SoftwareRenderState.cpp" />
     <ClCompile Include="type.cpp" />
     <ClCompile Include="Texture.cpp" />

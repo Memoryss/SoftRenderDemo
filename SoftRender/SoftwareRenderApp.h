@@ -6,13 +6,15 @@
 
 namespace SoftRenderer
 {
-	class SoftwareRenderWnd
+	class SoftwareRenderApp
 	{
 	public:
-        SoftwareRenderWnd();
-        ~SoftwareRenderWnd();
+        SoftwareRenderApp();
+        ~SoftwareRenderApp();
 
-        bool Init(HINSTANCE hInstance, const char *title, int width, int height);
+        bool Init(HWND hWnd, int w, int h);
+
+        void Resize(int w, int h);
 
         void ShowWnd(bool fullscreen = false);
 
@@ -32,6 +34,11 @@ namespace SoftRenderer
         HDC m_hdc;
 
         std::string m_directory;
+
+        HDC m_offscreenDC;
+        HBITMAP m_offsceenBitmap;
+
+        void *m_backBuffer;
 	};
 }
 

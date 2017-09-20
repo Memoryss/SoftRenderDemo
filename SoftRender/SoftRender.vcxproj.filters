@@ -36,13 +36,25 @@
     <ClInclude Include="Light.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SoftwareRenderAPI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="SoftwareRenderState.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SoftwareRenderWnd.h">
+    <ClInclude Include="SoftwareRender.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftwareRenderApp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftwareRenderContext.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,13 +74,25 @@
     <ClCompile Include="Object.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SoftwareRenderAPI.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SoftwareRenderState.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SoftwareRenderWnd.cpp">
+    <ClCompile Include="SoftwareRender.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftwareRenderApp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftwareRenderContext.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
