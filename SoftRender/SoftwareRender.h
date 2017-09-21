@@ -1,10 +1,10 @@
 #ifndef __SOFTWARE_RENDER_H__
 #define __SOFTWARE_RENDER_H__
 
+#include <windows.h>
+#include <vector>
 #include "type.h"
-#include "Light.h"
-#include "Object.h"
-#include "Camera.h"
+#include "SoftwareRenderContext.h"
 #include "SoftwareRenderState.h"
 
 namespace SoftRenderer
@@ -12,6 +12,11 @@ namespace SoftRenderer
     class FrameBuffer;
     class Texture;
     class Vertex;
+    class RenderBuffer;
+    class SoftwareRenderContext;
+    class Light;
+    class Camera;
+    class Shader;
 
     class SoftwareRender
     {
@@ -35,9 +40,11 @@ namespace SoftRenderer
 
         void SetTexture(Texture *texture);
 
+        void SetShader(Shader *shader);
+
         void SetRenderState(const SoftwareRenderState &state);
 
-        void Render();
+        void Render(RenderBuffer *buffer);
 
         void Begin();
 
@@ -46,63 +53,42 @@ namespace SoftRenderer
         void Present();
 
     protected:
-        void rasterizePoint();
+        void rasterizePoint(const RasterizerVertex *point);
 
-        void rasterizeLine();
+        void rasterizeLine(const RasterizerVertex *pointA, const RasterizerVertex *pointB);
 
-        void rasterizeTriangle();
+        void rasterizeTriangle(const RasterizerVertex *pointA, const RasterizerVertex *pointB, const RasterizerVertex *pointC);
+
+        bool cullBackFace(const RasterizerVertex *pa, const RasterizerVertex *pb, const RasterizerVertex *pc);
+
+        void vertexShader(RasterizerVertex *v_out, const Vertex *v_in);
+
+        bool fragmentShader(RasterizerVertex *v);
+
+        void output(int x, int y, const RasterizerVertex *v);
+
+        bool depthTest(float oldDepth, float newDepth);
 
     private:
-		int m_width{ 0 };
-		int m_height{ 0 };
+        SoftwareRenderContext *m_context{ NULL };
 
-		int m_viewportX{ 0 };
-		int m_viewportY{ 0 };
-		int m_viewportWidth{ 0 };
-		int m_viewportHeight{ 0 };
+        vec3 *m_colorBuffer{ NULL };
+        float *m_depthBuffer{ NULL };
+        int m_width{ 0 };
+        int m_height{ 0 };
 
-		BYTE *m_antiAliasingColorBuffer{ NULL };
-		int m_antiAliasingColorBufferWidth{ 0 };
-		int m_antiAliasingColorBufferHeight{ 0 };
-
-		BYTE *m_standardColorBuffer{ NULL };
-		int m_standardColorBufferWidth{ 0 };
-		int m_standardColorBufferHeight{ 0 };
-
-        BITMAPINFO m_bitmap;
-
-		BYTE *m_standardDepthBuffer{ NULL };
-		int m_standardDepthBufferWidth{ 0 };
-		int m_standardDepthBufferHeight{ 0 };
-
-		BYTE *m_depthBuffer{ NULL };
-		int m_depthBufferWidth{ 0 };
-		int m_depthBufferHeight{ 0 };
-
-		BYTE *m_colorBuffer{ NULL };
-		int m_colorBufferWidth{ 0 };
-		int m_colorBufferHeight{ 0 };
-
-		FrameBuffer *m_frameBuffer{ NULL };
-
-		mat4x4 m_mvpMatrix{ mat4x4(1.f) };
-		mat4x4 m_shadowMapMatrix{ mat4x4(1.f) };
-
-		Light *m_light;
-
-		bool m_bilinearTextureFiltering{ true };
-		bool m_depthTest{ false };
+        mat4x4 m_worldMatrix{ mat4x4(1.f) };
+        mat4x4 m_viewMatrix{ mat4x4(1.f) };
+        mat4x4 m_projMatrix{ mat4x4(1.f) };
 
         Texture *m_texture{ NULL };
-		Texture *m_shadowMap{ NULL };
-
-		Vertex *m_vertices{ NULL };
-
-        Object m_object;
-
-        Camera *m_camera;
+        Camera *m_camera{ NULL };
+        Light *m_light{ NULL };
 
         SoftwareRenderState m_renderState;
+        Shader *m_shader{ NULL };
+
+        std::vector<RasterizerVertex> m_rasterVertexBuffer;
     };
 }
 

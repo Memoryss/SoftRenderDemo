@@ -12,9 +12,28 @@ namespace SoftRenderer
 
 	enum CullFaceType
 	{
-		CFT_FRONT = 0,
-		CFF_BACK,
+        CFT_None = 0,
+		CFT_FRONT,
+		CFT_BACK,
 	};
+
+    enum DepthTestType
+    {
+        DTT_Always = 0,
+        DTT_Less,
+        DTT_LessEqual,
+        DTT_Greater,
+        DTT_GreaterEqual,
+        DTT_Equal,
+        DTT_NotEqual,
+    };
+
+    enum BlendType
+    {
+        BT_Opacity = 0,
+        BT_Add,
+        BT_AlphaBlend,
+    };
 
 	class Texture;
 
@@ -24,10 +43,6 @@ namespace SoftRenderer
 		SoftwareRenderState();
 		~SoftwareRenderState();
 
-		//设置启动剔除
-		void SetCullFaceEnable(bool cullFace);
-		bool GetCullFaceEnable();
-
 		//设置剔除类型
 		void SetCullFaceType(CullFaceType type);
 		CullFaceType GetCullFaceType();
@@ -36,9 +51,17 @@ namespace SoftRenderer
 		void SetAnitiAliasingType(AntiAliasingType type);
 		AntiAliasingType GetAnitiAliasingType();
 
-		//设置深度测试开关
-		void SetDepthTestEnable(bool depthTest);
-		bool GetDepthTestEnable();
+		//设置深度测试类型
+		void SetDepthTestType(DepthTestType type);
+        DepthTestType GetDepthTestType();
+
+        //深度遮罩
+        void EnableDepthMask(bool enable);
+        bool IsDepthMask();
+
+        //设置混合方式
+        void SetBlendType(BlendType type);
+        BlendType GetBlendType();
 
 		//设置双线性过滤
 		void SetBilinearTextureFilteringEnable(bool bilinearTextureFiltering);
@@ -49,14 +72,16 @@ namespace SoftRenderer
 		Texture * GetTexture();
 
 	private:
-		CullFaceType m_cullFaceType;
-		AntiAliasingType m_antiAliasingType;
+        CullFaceType m_cullFaceType{ CFT_BACK };
+        AntiAliasingType m_antiAliasingType{ AAT_2X2 };
+        DepthTestType m_depthTestType{ DTT_LessEqual };
+        BlendType m_blendType{ BT_Opacity };
 
-		bool m_depthTest;		//深度测试
-		bool m_bilinearTextureFiltering; //	纹理双线性过滤
-		bool m_cullFace;		//启动剔除
+        bool m_bilinearTextureFiltering{ true }; //	纹理双线性过滤
 
-		Texture *m_texture;		//纹理
+        bool m_depthMask{ false };  //深度遮罩 TODO透明物体？
+
+        Texture *m_texture{ NULL };		//纹理
 	};
 }
 

@@ -1,142 +1,421 @@
 #include "SoftwareRender.h"
 
+#include <assert.h>
+#include <algorithm>
+#include "Texture.h"
+#include "Light.h"
+#include "RenderBuffer.h"
+#include "Camera.h"
+#include "Shader.h"
+
 namespace SoftRenderer
 {
 
-	SoftwareRender::SoftwareRender()
-	{
-
-	}
-
-	SoftwareRender::~SoftwareRender()
-	{
-
-	}
-
-    bool SoftwareRender::InitScene()
+    SoftwareRender::SoftwareRender(HWND hwnd, int w, int h)
     {
-        bool success = true;
-        success = m_object.Load("models\\", "thor.obj");
-        if (!success)
-        {
-            return false;
-        }
+        m_context = new SoftwareRenderContext(hwnd, w, h);
 
-        m_light.m_position = m_camera.m_position;
-        m_light.m_ambient = vec3(0.5f);
-        m_light.m_diffuse = vec3(0.5f);
-        m_light.m_constAttention = 1.f;
-        m_light.m_linearAttention = 0.f;
-        m_light.m_quadraticAttention = 0.f;
+        m_width = w;
+        m_height = h;
 
-        return true;
+        m_colorBuffer = new vec3[m_width * m_height];
+        m_depthBuffer = new float[m_width * m_height];
     }
 
-    void SoftwareRender::Clear()
+    SoftwareRender::~SoftwareRender()
     {
         if (NULL != m_colorBuffer)
         {
-            memset(m_colorBuffer, 0, m_colorBufferWidth * m_colorBufferHeight * 3);
+            delete[] m_colorBuffer;
         }
 
         if (NULL != m_depthBuffer)
         {
-            memset(m_depthBuffer, 0, m_depthBufferWidth * m_depthBufferHeight * 2);
+            delete[] m_depthBuffer;
+        }
+
+        //TODO light texture camera
+    }
+
+    void SoftwareRender::Resize(int width, int height)
+    {
+        assert(width > 1 && height > 1);
+        m_context->Resize(width, height);
+
+        if (NULL != m_colorBuffer)
+        {
+            delete[] m_colorBuffer;
+        }
+
+        if (NULL != m_depthBuffer)
+        {
+            delete[] m_depthBuffer;
+        }
+
+        m_width = width;
+        m_height = height;
+
+        m_colorBuffer = new vec3[m_width * m_height];
+        m_depthBuffer = new float[m_width * m_height];
+    }
+
+    void SoftwareRender::Clear(const vec3 &color /*= vec3(0.f, 0.f, 0.f)*/, float depth /*= 1.f*/)
+    {
+        if (color == 0.f)
+        {
+            memset(m_colorBuffer, 0, m_width * m_height * 12);
+        }
+        else
+        {
+            for (int i = 0; i < m_width * m_height; ++i)
+            {
+                m_colorBuffer[i] = color;
+            }
+        }
+
+        for (int i = 0; i < m_width * m_height; ++i)
+        {
+            m_depthBuffer[i] = depth;
         }
     }
 
-    void SoftwareRender::SetMVPMatrix(mat4x4 matrix)
+    void SoftwareRender::SetWorldMatrix(const mat4x4 &m)
     {
-        m_mvpMatrix = matrix;
+        m_worldMatrix = m;
     }
 
-    void SoftwareRender::SetLight(const Light &light)
+    void SoftwareRender::SetViewMatrix(const mat4x4 &m)
+    {
+        m_viewMatrix = m;
+    }
+
+    void SoftwareRender::SetProjMatrix(const mat4x4 &m)
+    {
+        m_projMatrix = m;
+    }
+
+    void SoftwareRender::SetCamera(Camera *cam)
+    {
+        m_camera = cam;
+    }
+
+    void SoftwareRender::SetLight(Light *light)
     {
         m_light = light;
     }
 
-    void SoftwareRender::DrawTriangles(Vertex *vertices, int index, int count)
+    void SoftwareRender::SetTexture(Texture *texture)
     {
-        if (NULL == m_colorBuffer || NULL == m_depthBuffer || NULL == vertices || index < 0 || count < 3)
+        m_texture = texture;
+    }
+
+    void SoftwareRender::SetShader(Shader *shader)
+    {
+        m_shader = shader;
+    }
+
+    void SoftwareRender::SetRenderState(const SoftwareRenderState &state)
+    {
+        m_renderState = state;
+    }
+
+    void SoftwareRender::Render(RenderBuffer *buffer)
+    {
+        if (buffer->vbuffer.size() <= 0 || buffer->primCount <= 0)
         {
             return;
         }
 
-        int startIndex = index;
-        int endIndex = index + count / 3 * 3;
-        
-        float *mvpMatrixPtr = &m_mvpMatrix;
-
-        //图元装配 将顶点组装为三角形
-        Triangle triangle;
-
-        for (int i = startIndex; i < endIndex; i += 3)
+        //顶点处理
+        m_rasterVertexBuffer.resize(buffer->vbuffer.size());
+        //TODO 优化 需要每个顶点就需要？
+        for (int i = 0; i < buffer->vbuffer.size(); ++i)
         {
-            Vertex *vertex = m_vertices + i;
-            for (int j = 0; j < 3; ++j)
+            vertexShader(&m_rasterVertexBuffer[i], &buffer->vbuffer[i]);
+        }
+
+        //图元
+        RasterizerVertex a, b, c;
+        for (int i = 0; i < buffer->primCount; ++i)
+        {
+            if (buffer->primType == PT_TriangleList)
             {
-                auto &position = triangle.m_positions[i];
-                auto &color = triangle.m_colors[i];
-                auto &texcoord = triangle.m_texcoord[i];
-                    //顶点变化 分开运算减少不必要的计算
-                position.x = mvpMatrixPtr[0] * vertex[i].m_position.x + mvpMatrixPtr[4] * vertex[i].m_position.y + mvpMatrixPtr[8] * vertex[i].m_position.z + mvpMatrixPtr[12];
-                position.y = mvpMatrixPtr[1] * vertex[i].m_position.x + mvpMatrixPtr[5] * vertex[i].m_position.y + mvpMatrixPtr[9] * vertex[i].m_position.z + mvpMatrixPtr[13];
-                position.x = mvpMatrixPtr[2] * vertex[i].m_position.x + mvpMatrixPtr[6] * vertex[i].m_position.y + mvpMatrixPtr[10] * vertex[i].m_position.z + mvpMatrixPtr[14];
-                position.x = mvpMatrixPtr[3] * vertex[i].m_position.x + mvpMatrixPtr[7] * vertex[i].m_position.y + mvpMatrixPtr[11] * vertex[i].m_position.z + mvpMatrixPtr[15];
-
-                color.r = vertex[i].m_color.r;
-                color.g = vertex[i].m_color.g;
-                color.b = vertex[i].m_color.b;
-
-                texcoord.s = vertex[i].m_texcoord.s;
-                texcoord.t = vertex[i].m_texcoord.t;
-
-                //光照计算
-                if (NULL != m_light)
+                //索引列表
+                if (buffer->ibuffer.size() > 0)
                 {
-                    vec3 lightDir;
-                    lightDir.x = m_light->m_position.x - vertex[i].m_position.x;
-                    lightDir.y = m_light->m_position.y - vertex[i].m_position.y;
-                    lightDir.z = m_light->m_position.z - vertex[i].m_position.z;
-
-                    float lightDis2 = lightDir.x * lightDir.x + lightDir.y * lightDir.y + lightDir.z * lightDir.z;
-                    float lightDis = sqrt(lightDis2);
-
-                    //漫反射角余弦值
-                    float normalDotLightDir = (lightDir.x * vertex->m_normal.x + lightDir.y * vertex->m_normal.y + lightDir.z * vertex->m_normal.z) / (lightDis * 1);
-
-                    if (normalDotLightDir < 0.f)
-                    {
-                        normalDotLightDir = 0.f;
-                    }
-
-                    //计算衰减参数
-                    float lightAttenuation = 1.f / (m_light->m_constAttention + m_light->m_linearAttention * lightDis + m_light->m_quadraticAttention * lightDis * lightDis);
-
-                    color.r *= (m_light->m_ambient.r + m_light->m_diffuse.r * normalDotLightDir) * lightAttenuation;
-                    color.g *= (m_light->m_ambient.g + m_light->m_diffuse.g * normalDotLightDir) * lightAttenuation;
-                    color.b *= (m_light->m_ambient.b + m_light->m_diffuse.b * normalDotLightDir) * lightAttenuation;
+                    a = m_rasterVertexBuffer[buffer->ibuffer[i * 3 + 0]];
+                    b = m_rasterVertexBuffer[buffer->ibuffer[i * 3 + 1]];
+                    c = m_rasterVertexBuffer[buffer->ibuffer[i * 3 + 2]];
                 }
+                else
+                {
+                    a = m_rasterVertexBuffer[i * 3 + 0];
+                    b = m_rasterVertexBuffer[i * 3 + 1];
+                    c = m_rasterVertexBuffer[i * 3 + 2];
+                }
+
+                //背面剔除
+                if (cullBackFace(&a, &b, &c))
+                {
+                    continue;
+                }
+
+                //视口变化：透视除法，屏幕映射
+                a.position.x /= a.position.w;
+                a.position.y /= a.position.w;
+                b.position.x /= b.position.w;
+                b.position.y /= b.position.w;
+                c.position.x /= c.position.w;
+                c.position.y /= c.position.w;
+
+                //透视除法之后 点在cvv中 范围为-1 ~ 1 注意屏幕坐标和y坐标相反
+                a.position.x = (a.position.x + 1) / 2 * m_width;
+                a.position.y = (1 - a.position.y) / 2 * m_width;
+                b.position.x = (b.position.x + 1) / 2 * m_width;
+                b.position.y = (1 - b.position.y) / 2 * m_width;
+                c.position.x = (c.position.x + 1) / 2 * m_width;
+                c.position.y = (1 - c.position.y) / 2 * m_width;
+
+                //光栅化
+                rasterizeTriangle(&a, &b, &c);
             }
-
-            //裁剪三角形
-
         }
     }
 
-    void SoftwareRender::ClipTriangle(Triangle &triangle)
+    void SoftwareRender::Begin()
+    {
+        m_texture = NULL;
+        m_light = NULL;
+        m_shader = NULL;
+    }
+
+    void SoftwareRender::End()
+    {
+        
+    }
+
+    void SoftwareRender::Present()
+    {
+        m_context->Present(m_colorBuffer);
+    }
+
+    void SoftwareRender::rasterizePoint(const RasterizerVertex *point)
     {
 
     }
 
-    void SoftwareRender::Render(float frameTime)
+    void SoftwareRender::rasterizeLine(const RasterizerVertex *pointA, const RasterizerVertex *pointB)
     {
-        //清楚深度缓存和颜色缓存
-        Clear();
 
-        //设置矩阵
-        SetMVPMatrix(m_camera.m_viewPorjectMatrix);
+    }
 
+    void SoftwareRender::rasterizeTriangle(const RasterizerVertex *pointA, const RasterizerVertex *pointB, const RasterizerVertex *pointC)
+    {
+        //确保pointA是最上面的点
+        if (pointA->position.y > pointB->position.y)
+        {
+            std::swap(pointA, pointB);
+        }
+        if (pointA->position.y > pointC->position.y)
+        {
+            std::swap(pointA, pointC);
+        }
+
+        //pointB在pointC的左边
+        if (pointB->position.x > pointC->position.x)
+        {
+            std::swap(pointB, pointC);
+        }
+
+        vec2i a(pointA->position.x, pointA->position.y);
+        vec2i b(pointB->position.x, pointB->position.y);
+        vec2i c(pointC->position.x, pointC->position.y);
+        vec2i ab = b - a;
+        vec2i ac = c - a;
+
+        RasterizerVertex v1, v2, v;
+        if (b.y > c.y)
+        {
+            //三角形类别
+            /**
+                A
+                    C
+            B
+            */
+
+            //画上半部分
+            int start_y = a.y, end_y = c.y;
+            start_y = std::max(start_y, 0);
+            end_y = std::min(end_y, m_height);
+
+            while (start_y < end_y)
+            {
+                //y轴比率
+                float ratio_ab = ab.y > 0 ? (float)(start_y - a.y) / ab.y : 1;
+                float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
+
+                int x1 = (int)(a.x + ab.x * ratio_ab);
+                int x2 = (int)(a.x + ac.x * ratio_ac);
+
+                //获取三角形边上的点
+                RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
+                RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
+
+                //交换下位置 便于理解和计算
+                if (x1 > x2)
+                {
+                    std::swap(x1, x2);
+                    std::swap(v1, v2);
+                }
+
+                int start_x = std::max(x1, 0);
+                int end_x = std::max(x2, m_width);
+
+                for (int x = start_x; x < end_x; ++x)
+                {
+                    //x轴比率
+                    float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
+
+                    RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
+                    //像素着色
+                    if (fragmentShader(&v))
+                    {
+                        //输出到colorbuff
+                        output(x, start_y, &v);
+                    }
+                }
+                ++start_y;
+            }
+
+            //画下半部分
+            vec2i cb(b.x - c.x, b.y - c.y);
+            end_y = std::min(b.y, m_height);
+
+            while (start_y < end_y)
+            {
+                float ratio_ab = ab.y > 0 ? (float)(start_y - a.y) / ab.y : 1;
+            }
+
+        }
+        else
+        {
+            //三角形类别
+            /**
+                A
+            B
+                    C
+            */
+
+            //画上半部分
+            int start_y = a.y, end_y = 
+        }
+    }
+
+    bool SoftwareRender::cullBackFace(const RasterizerVertex *pa, const RasterizerVertex *pb, const RasterizerVertex *pc)
+    {
+        if (m_renderState.GetCullFaceType() == CFT_None)
+        {
+            return false;
+        }
+
+        //xy二维可以判断背面
+        vec2 ab, ac;
+        ab.x = pb->position.x - pa->position.x;
+        ab.y = pb->position.y - pa->position.y;
+
+        ac.x = pc->position.x - pa->position.x;
+        ac.y = pc->position.y - pa->position.y;
+
+        float cross = ab.x * ac.y - ab.y * ac.x;
+
+        //剔除背面  法线朝向z正方形的被剔除
+        if (m_renderState.GetCullFaceType() == CFT_BACK)
+        {
+            return cross > 0.f;
+        }
+        else
+        {
+            return cross < 0.f;
+        }
+    }
+
+    void SoftwareRender::vertexShader(RasterizerVertex *v_out, const Vertex *v_in)
+    {
+        m_shader->VertexShader(v_out, v_in);
+    }
+
+    bool SoftwareRender::fragmentShader(RasterizerVertex *v)
+    {
+        return m_shader->FragmentShader(v);
+    }
+
+    void SoftwareRender::output(int x, int y, const RasterizerVertex *v)
+    {
+        int index = y * m_width + x;
+        //z也进行透视除法
+        float depth = v->position.z / v->position.w;
+
+        //深度测试 TODO 拿到最前面 减少性能损耗？
+        if (!depthTest(m_depthBuffer[index], depth))
+        {
+            return;
+        }
+
+        if (m_renderState.IsDepthMask())
+        {
+            m_depthBuffer[index] = depth;
+        }
+
+        vec3 *fragmentColor = m_colorBuffer + index;
+        switch (m_renderState.GetBlendType())
+        {
+        case BT_Opacity:
+            fragmentColor->r = v->color.r;
+            fragmentColor->g = v->color.g;
+            fragmentColor->b = v->color.b;
+            break;
+        case BT_Add:
+            fragmentColor->r += v->color.r;
+            fragmentColor->g += v->color.g;
+            fragmentColor->b += v->color.b;
+            break;
+        case BT_AlphaBlend:
+            fragmentColor->r = v->color.a * v->color.r + (1 - v->color.a) * fragmentColor->r;
+            fragmentColor->g = v->color.a * v->color.g + (1 - v->color.a) * fragmentColor->g;
+            fragmentColor->b = v->color.a * v->color.b + (1 - v->color.a) * fragmentColor->b;
+            break;
+        default:
+            break;
+        }
+
+        std::clamp(fragmentColor->r, 0.f, 1.f);
+        std::clamp(fragmentColor->g, 0.f, 1.f);
+        std::clamp(fragmentColor->b, 0.f, 1.f);
+    }
+
+    bool SoftwareRender::depthTest(float oldDepth, float newDepth)
+    {
+        switch (m_renderState.GetDepthTestType())
+        {
+        case DTT_Always:
+            return true;
+        case DTT_Less:
+            return newDepth < oldDepth;
+        case DTT_LessEqual:
+            return newDepth <= oldDepth;
+        case DTT_Greater:
+            return newDepth > oldDepth;
+        case DTT_GreaterEqual:
+            return newDepth >= oldDepth;
+        case DTT_Equal:
+            return newDepth == oldDepth;
+        case DTT_NotEqual:
+            return newDepth != oldDepth;
+        default:
+            break;
+        }
+
+        return false;
     }
 
 }

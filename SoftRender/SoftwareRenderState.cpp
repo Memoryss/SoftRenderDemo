@@ -4,12 +4,6 @@ namespace SoftRenderer
 {
 
 	SoftwareRenderState::SoftwareRenderState()
-		: m_cullFace(false)
-		, m_cullFaceType(CFF_BACK)
-		, m_antiAliasingType(AAT_2X2)
-		, m_bilinearTextureFiltering(true)
-		, m_depthTest(true)
-		, m_texture(0)
 	{
 
 	}
@@ -17,16 +11,6 @@ namespace SoftRenderer
 	SoftwareRenderState::~SoftwareRenderState()
 	{
 
-	}
-
-	void SoftwareRenderState::SetCullFaceEnable(bool cullFace)
-	{
-		m_cullFace = cullFace;
-	}
-
-	bool SoftwareRenderState::GetCullFaceEnable()
-	{
-		return m_cullFace;
 	}
 
 	void SoftwareRenderState::SetCullFaceType(CullFaceType type)
@@ -49,17 +33,37 @@ namespace SoftRenderer
 		return m_antiAliasingType;
 	}
 
-	void SoftwareRenderState::SetDepthTestEnable(bool depthTest)
+	void SoftwareRenderState::SetDepthTestType(DepthTestType type)
 	{
-		m_depthTest = depthTest;
+		m_depthTestType = type;
 	}
 
-	bool SoftwareRenderState::GetDepthTestEnable()
+    DepthTestType SoftwareRenderState::GetDepthTestType()
 	{
-		return m_depthTest;
+		return m_depthTestType;
 	}
 
-	void SoftwareRenderState::SetBilinearTextureFilteringEnable(bool bilinearTextureFiltering)
+    void SoftwareRenderState::EnableDepthMask(bool enable)
+    {
+        m_depthMask = enable;
+    }
+
+    bool SoftwareRenderState::IsDepthMask()
+    {
+        return m_depthMask;
+    }
+
+    void SoftwareRenderState::SetBlendType(BlendType type)
+    {
+        m_blendType = type;
+    }
+
+    BlendType SoftwareRenderState::GetBlendType()
+    {
+        return m_blendType;
+    }
+
+    void SoftwareRenderState::SetBilinearTextureFilteringEnable(bool bilinearTextureFiltering)
 	{
 		m_bilinearTextureFiltering = bilinearTextureFiltering;
 	}

@@ -6,6 +6,45 @@
 
 namespace SoftRenderer {
 
+    //TODO 最好使用模版
+    struct vec2i
+    {
+        union
+        {
+            struct { int x, y; };
+            struct { int u, v; };
+        };
+
+        vec2i() {}
+        ~vec2i() {}
+        vec2i(int num) : x(num), y(num) {}
+        vec2i(int x, int y) : x(x), y(y) {}
+        vec2i(const vec2i &u) : x(u.x), y(u.y) {}
+        vec2i& operator = (const vec2i &u) { x = u.x; y = u.y; return *this; }
+        vec2i operator - () { return vec2i(-x, -y); }
+        float* operator & () { return (float*)this; };
+        vec2i& operator += (float num) { x += num; y += num; return *this; }
+        vec2i& operator += (const vec2i &u) { x += u.x; y += u.y; return *this; }
+        vec2i& operator -= (float num) { x -= num; y -= num; return *this; }
+        vec2i& operator -= (const vec2i &u) { x -= u.x; y -= u.y; return *this; }
+        vec2i& operator *= (float num) { x *= num; y *= num; return *this; }
+        vec2i& operator *= (const vec2i &u) { x *= u.x; y *= u.y; return *this; }
+        vec2i& operator /= (float num) { x /= num; y /= num; return *this; }
+        vec2i& operator /= (const vec2i &u) { x /= u.x; y /= u.y; return *this; }
+        friend vec2i operator + (const vec2i &u, int num) { return vec2i(u.x + num, u.y + num); }
+        friend vec2i operator + (int num, const vec2i &u) { return vec2i(num + u.x, num + u.y); }
+        friend vec2i operator + (const vec2i &u, const vec2i &v) { return vec2i(u.x + v.x, u.y + v.y); }
+        friend vec2i operator - (const vec2i &u, int num) { return vec2i(u.x - num, u.y - num); }
+        friend vec2i operator - (int num, const vec2i &u) { return vec2i(num - u.x, num - u.y); }
+        friend vec2i operator - (const vec2i &u, const vec2i &v) { return vec2i(u.x - v.x, u.y - v.y); }
+        friend vec2i operator * (const vec2i &u, int num) { return vec2i(u.x * num, u.y * num); }
+        friend vec2i operator * (int num, const vec2i &u) { return vec2i(num * u.x, num * u.y); }
+        friend vec2i operator * (const vec2i &u, const vec2i &v) { return vec2i(u.x * v.x, u.y * v.y); }
+        friend vec2i operator / (const vec2i &u, int num) { return vec2i(u.x / num, u.y / num); }
+        friend vec2i operator / (int num, const vec2i &u) { return vec2i(num / u.x, num / u.y); }
+        friend vec2i operator / (const vec2i &u, const vec2i &v) { return vec2i(u.x / v.x, u.y / v.y); }
+    };
+
     struct vec2
     {
         union
@@ -79,6 +118,8 @@ namespace SoftRenderer {
         vec3& operator *= (const vec3 &u) { x *= u.x; y *= u.y; z *= u.z; return *this; }
         vec3& operator /= (float num) { x /= num; y /= num; z /= num; return *this; }
         vec3& operator /= (const vec3 &u) { x /= u.x; y /= u.y; z /= u.z; return *this; }
+        bool operator == (const vec3 &u) const { return x == u.x && y == u.y && z == u.z; }
+        bool operator == (float num) const { return x == num && y == num && z == num; }
         friend vec3 operator + (const vec3 &u, float num) { return vec3(u.x + num, u.y + num, u.z + num); }
         friend vec3 operator + (float num, const vec3 &u) { return vec3(num + u.x, num + u.y, num + u.z); }
         friend vec3 operator + (const vec3 &u, const vec3 &v) { return vec3(u.x + v.x, u.y + v.y, u.z + v.z); }

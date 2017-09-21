@@ -145,14 +145,18 @@
     <ClInclude Include="IFile.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="SoftwareRender.h" />
     <ClInclude Include="SoftwareRenderContext.h" />
     <ClInclude Include="SoftwareRenderState.h" />
     <ClInclude Include="SoftwareRenderApp.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
