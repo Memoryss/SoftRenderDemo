@@ -294,8 +294,33 @@ namespace SoftRenderer
             while (start_y < end_y)
             {
                 float ratio_ab = ab.y > 0 ? (float)(start_y - a.y) / ab.y : 1;
-            }
+                float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
 
+                int x1 = (int)(a.x + ab.x * ratio_ab);
+                int x2 = (int)(a.x + ac.x * ratio_ac);
+
+                RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
+                RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
+
+                if (x1 > x2)
+                {
+                    std::swap(x1, x2);
+                }
+
+                int start_x = std::max(x1, 0);
+                int end_x = std::min(x2, m_width);
+
+                for (int x = start_x; x < end_x; ++x)
+                {
+                    float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
+                    RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
+                    if (fragmentShader(&v))
+                    {
+                        output(x, start_y, &v);
+                    }
+                }
+                ++start_y;
+            }
         }
         else
         {
