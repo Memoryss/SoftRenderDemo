@@ -201,12 +201,202 @@ namespace SoftRenderer
 
     void SoftwareRender::rasterizePoint(const RasterizerVertex *point)
     {
+		RasterizerVertex v = *point;
 
+		int x = (int)v.position.x;
+		int y = (int)v.position.y;
+		if (x >= 0 && x < m_width && y >= 0 && y < m_height)
+		{
+			if (fragmentShader(&v))
+			{
+				output(x, y, &v);
+			}
+		}
     }
 
     void SoftwareRender::rasterizeLine(const RasterizerVertex *pointA, const RasterizerVertex *pointB)
     {
+		if (pointA->position.x > pointB->position.x)
+		{
+			std::swap(pointA, pointB);
+		}
 
+		RasterizerVertex v;
+
+		vec2i a(pointA->position.x, pointA->position.y);
+		vec2i b(pointB->position.y, pointB->position.y);	
+		vec2i ab = b - a;
+
+		//斜率小于0.5
+		if (ab.x > std::abs(ab.y))
+		{
+			//计算斜率
+			float k = (float)ab.y / ab.x;
+			int x = a.x;
+			int y = a.y;
+
+			if (k > 0)
+			{
+				//四舍五入 > 0.5 y+1
+				float e = -0.5f;
+
+				for (int i = 0; i < ab.x; ++i)
+				{
+					x = x + 1;
+					e = e + k;
+					if (e > 0)
+					{
+						y += 1;
+						e -= 1.f;
+					}
+
+					if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+					{
+						float ratio_x = ab.x > 0 ? (float)i / ab.x : 1;
+						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_x);
+						if (fragmentShader(&v))
+						{
+							output(x, y, &v);
+						}
+					}
+				}
+			}
+			else if (k == 0)
+			{
+				for (int i = 0; i < ab.x; ++i)
+				{
+					x = x + 1;
+					if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+					{
+						float ratio_x = ab.x > 0 ? (float)i / ab.x : 1;
+						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_x);
+						if (fragmentShader(&v))
+						{
+							output(x, y, &v);
+						}
+					}
+				}
+			}
+			else
+			{
+				float e = -0.5f;
+				for (int i = 0; i < ab.x; ++i)
+				{
+					x = x + 1;
+					//k < 0
+					e = e - k;
+					if (e > 0)
+					{
+						y = y - 1;
+						e = e - 1.f;
+					}
+
+					if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+					{
+						float ratio_x = ab.x > 0 ? (float)i / ab.x : 1;
+
+						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_x);
+						if (fragmentShader(&v))
+						{
+							output(x, y, &v);
+						}
+					}
+				}
+			}
+		}
+		//斜率>0.5
+		else
+		{
+			float k = (float)ab.x / ab.y;
+			int x = a.x;
+			int y = a.y;
+
+			if (k > 0)
+			{
+				float e = -0.5f;
+
+				for (int i = 0; i < ab.y; ++i)
+				{
+					y += 1;
+					e += k;
+					if (e > 0.f)
+					{
+						x += 1;
+						e -= 1.f;
+					}
+
+					if (y >= 0 && y <= m_height && x >= 0 && x < m_width)
+					{
+						float ratio_y = ab.y > 0 ? (float)i / ab.y : 1;
+						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
+						if (fragmentShader(v))
+						{
+							output(x, y, v);
+						}
+					}
+				}
+			}
+			else if (k == 0)
+			{
+				if (ab.y > 0)
+				{
+					for (int i = 0; i < ab.y; ++i)
+					{
+						y = y + 1;
+						if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+						{
+							float ratio_y = ab.y > 0 ? (float)i / ab.y : 1;
+							RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
+							if (fragmentShader(&v))
+							{
+								output(x, y, &v);
+							}
+						}
+					}
+				}
+				else
+				{
+					for (int i = 0; i < -ab.y; ++i)
+					{
+						y -= 1;
+						if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+						{
+							float ratio_y = -ab.y > 0 ? (float)i / -ab.y : 1;
+							RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
+							if (fragmentShader(&v))
+							{
+								output(x, y, &v);
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				float e = -0.5f;
+
+				for (int i = 0; i < -ab.y; ++i)
+				{
+					y -= 1;
+					e -= k;
+					if (e > 0.f)
+					{
+						x += 1;
+						e -= 1.f;
+					}
+
+					if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
+					{
+						float ratio_y = -ab.y > 0 : (float)i / -ab.y : 1;
+						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
+						if (fragmentShader(&v))
+						{
+							output(&v);
+						}
+					}
+				}
+			}
+		}
     }
 
     void SoftwareRender::rasterizeTriangle(const RasterizerVertex *pointA, const RasterizerVertex *pointB, const RasterizerVertex *pointC)
@@ -294,13 +484,13 @@ namespace SoftRenderer
             while (start_y < end_y)
             {
                 float ratio_ab = ab.y > 0 ? (float)(start_y - a.y) / ab.y : 1;
-                float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
+                float ratio_cb = cb.y > 0 ? (float)(start_y - c.y) / cb.y : 1;
 
                 int x1 = (int)(a.x + ab.x * ratio_ab);
-                int x2 = (int)(a.x + ac.x * ratio_ac);
+                int x2 = (int)(a.x + ac.x * ratio_cb);
 
                 RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
-                RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
+                RasterizerVertex::Lerp(v2, *pointC, *pointB, ratio_cb);
 
                 if (x1 > x2)
                 {
@@ -332,7 +522,76 @@ namespace SoftRenderer
             */
 
             //画上半部分
-            int start_y = a.y, end_y = 
+			int start_y = a.y, end_y = b.y;
+			start_y = std::max(0, start_y);
+			end_y = std::min(m_height, end_y);
+			
+			while (start_y < end_y)
+			{
+				//x轴比率
+				float ratio_ab = ab.y > 0 ? (float)(start_y - a.y) / ab.y : 1;
+				float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
+
+				int x1 = (int)(a.x + ratio_ab * ab.x);
+				int x2 = (int)(a.x + ratio_ab * ac.x);
+
+				RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
+				RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
+
+				if (x1 > x2)
+				{
+					std::swap(x1, x2);
+					std::swap(v1, v2);
+				}
+
+				int start_x = std::max(0, x1);
+				int end_x = std::min(m_width, x2);
+				for (int x = x1; x < x2; ++x)
+				{
+					float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
+					RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
+					if (fragmentShader(&v))
+					{
+						output(x, start_y, &v);
+					}
+				}
+				++start_y;
+			}
+
+			//画下半部分
+			vec2i bc(c.x - b.x, c.y - b.y);
+			end_y = std::min(m_height, c.y);
+			while (start_y < end_y)
+			{
+				float ratio_bc = bc.y > 0 ? (float)(start_y - b.y) / bc.y : 1;
+				float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
+
+				int x1 = (int)(b.x + bc.x * ratio_bc);
+				int x2 = (int)(a.x + ac.x * ratio_ac);
+
+				RasterizerVertex::Lerp(v1, *pointB, *pointC, ratio_bc);
+				RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
+
+				if (x1 > x2)
+				{
+					std::swap(x1, x2);
+					std::swap(v1, v2);
+				}
+
+				int start_x = std::max(x1, 0);
+				int end_x = std::min(x2, m_height);
+				for (int x = start_x; x < end_x; ++x)
+				{
+					int ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
+
+					RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
+					if (fragmentShader(&v))
+					{
+						output(x, start_y, &v);
+					}
+				}
+				++start_y;
+			}
         }
     }
 
@@ -353,7 +612,7 @@ namespace SoftRenderer
 
         float cross = ab.x * ac.y - ab.y * ac.x;
 
-        //剔除背面  法线朝向z正方形的被剔除
+        //剔除背面  法线朝向z正方向的被剔除
         if (m_renderState.GetCullFaceType() == CFT_BACK)
         {
             return cross > 0.f;
