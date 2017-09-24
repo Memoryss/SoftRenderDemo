@@ -329,9 +329,9 @@ namespace SoftRenderer
 					{
 						float ratio_y = ab.y > 0 ? (float)i / ab.y : 1;
 						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
-						if (fragmentShader(v))
+						if (fragmentShader(&v))
 						{
-							output(x, y, v);
+							output(x, y, &v);
 						}
 					}
 				}
@@ -387,11 +387,11 @@ namespace SoftRenderer
 
 					if (x >= 0 && x < m_width && y >= 0 && y <= m_height)
 					{
-						float ratio_y = -ab.y > 0 : (float)i / -ab.y : 1;
+						float ratio_y = -ab.y > 0 ? (float)i / -ab.y : 1;
 						RasterizerVertex::Lerp(v, *pointA, *pointB, ratio_y);
 						if (fragmentShader(&v))
 						{
-							output(&v);
+							output(x, y, &v);
 						}
 					}
 				}
