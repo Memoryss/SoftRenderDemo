@@ -160,6 +160,7 @@ namespace SoftRenderer {
         vec4(const vec3 &u, float w) : x(u.x), y(u.y), z(u.z), w(w) {}
         vec4(const vec4 &u) : x(u.x), y(u.y), z(u.z), w(u.w) {}
         vec4& operator = (const vec4 &u) { x = u.x; y = u.y; z = u.z; w = u.w; return *this; }
+        vec4& operator = (const vec3 &u) { x = u.x; y = u.y; z = u.z; w = 1.f; return *this; }
         vec4 operator - () { return vec4(-x, -y, -z, -w); }
         float* operator & () { return (float*)this; }
         vec4& operator += (float num) { x += num; y += num; z += num; w += num; return *this; }
@@ -249,6 +250,7 @@ namespace SoftRenderer {
         float* operator & ();
         friend mat4x4 operator * (const mat4x4 &Matrix1, const mat4x4 &Matrix2);
         friend vec4 operator * (const mat4x4 &Matrix, const vec4 &u);
+        friend vec3 operator * (const mat4x4 &Matrix, const vec3 &u);
     };
 
     extern mat4x4 BiasMatrix;
@@ -268,6 +270,10 @@ namespace SoftRenderer {
 
     void StrToWstr(const std::string &src, std::wstring &dest);
     void WstrToStr(const std::wstring &src, std::string &dest);
+
+#undef M_PI
+    static const float M_PI = 3.14159265358979323846264338327950288f;
+    static const float M_DEGTORAD = M_PI / 180.f;
 }
 
 #endif

@@ -42,7 +42,12 @@ namespace SoftRenderer
 		m_viewPorjectMatrix = m_projectMatrix * m_viewMatrix;
 	}
 
-	void Camera::calculateViewMatrix()
+    bool Camera::IsVisibleInFrustum(const AABB &aabb) const
+    {
+        return m_frustum.IsInside(aabb) != OUTSIDE;
+    }
+
+    void Camera::calculateViewMatrix()
 	{
 		m_viewMatrix = mat4x4(m_u.x, m_v.x, m_n.x, 0.f, m_u.y, m_v.y, m_n.y, 0.f, m_u.z, m_v.z, m_n.z, 0.f, -dot(m_u, m_position), -dot(m_v, m_position), -dot(m_n, m_position), 1.f);
 		m_viewPorjectMatrix = m_projectMatrix * m_viewMatrix;

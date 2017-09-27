@@ -67,10 +67,6 @@ namespace SoftRenderer
 		void SetBilinearTextureFilteringEnable(bool bilinearTextureFiltering);
 		bool GetBilinearTextureFilteringEnable();
 
-		//设置纹理
-		void SetTexture(Texture *texture);
-		Texture * GetTexture();
-
 	private:
         CullFaceType m_cullFaceType{ CFT_BACK };
         AntiAliasingType m_antiAliasingType{ AAT_2X2 };
@@ -80,8 +76,6 @@ namespace SoftRenderer
         bool m_bilinearTextureFiltering{ true }; //	纹理双线性过滤
 
         bool m_depthMask{ false };  //深度遮罩 TODO透明物体？
-
-        Texture *m_texture{ NULL };		//纹理
 	};
 }
 

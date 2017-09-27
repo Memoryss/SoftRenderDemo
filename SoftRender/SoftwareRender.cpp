@@ -128,7 +128,6 @@ namespace SoftRenderer
 
         //顶点处理
         m_rasterVertexBuffer.resize(buffer->vbuffer.size());
-        //TODO 优化 需要每个顶点就需要？
         for (int i = 0; i < buffer->vbuffer.size(); ++i)
         {
             vertexShader(&m_rasterVertexBuffer[i], &buffer->vbuffer[i]);

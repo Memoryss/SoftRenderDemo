@@ -1,6 +1,7 @@
 #include "Texture.h"
 
 #include <string>
+#include <assert.h>
 #include "FreeImage.h"
 #include "log.h"
 
@@ -94,25 +95,10 @@ namespace SoftRenderer {
 		FreeImage_Unload(dib);
     }
 
-    void Texture::GetColorNearest(float s, float t, vec3 &color)
+    void Texture::getColorNearest(int x, int y, vec4 &color)
     {
 		if (NULL != m_data)
 		{
-			//区间为0-1
-			s -= (int)s;
-			t -= (int)t;
-			if (s < 0.0f)
-			{
-				s = 1.0f;
-			}
-			if (t < 0.f)
-			{
-				t = 1.0f;
-			}
-
-			int x = (int)(m_width * s);
-			int y = (int)(m_height * t);
-
 			switch (m_format)
 			{
 			case SoftRenderer::TF_NONE:
@@ -131,48 +117,26 @@ namespace SoftRenderer {
 				color.b = color.g = color.r = *b * CD_65535;
 				break;
 			default:
+                color.b = color.g = color.r = 0.f;
+                color.a = 1.f;
 				break;
 			}
 		}
 		else
 		{
-			color.b = color.g = color.r = 1.f;
+            color.b = color.g = color.r = 0.f;
+            color.a = 1.f;
 		}
     }
 
-    void Texture::GetColorBilinear(float s, float t, vec3 &color)
+    void Texture::getColorBilinear(int x, int y, vec4 &color)
     {
 		if (NULL != m_data)
 		{
-			//区间为0-1
-			s -= (int)s;
-			t -= (int)t;
-			if (s < 0.0f)
-			{
-				s = 1.0f;
-			}
-			if (t < 0.f)
-			{
-				t = 1.0f;
-			}
-
-			float fx = s * m_width - 0.5f;
-			float fy = t * m_height - 0.5f;
-
-			//如果<0 移到图像末尾
-			if (fx < 0.0f)
-			{
-				fx += m_width;
-			}
-			if (fy < 0.0f)
-			{
-				fy += m_height;
-			}
-
 			//取出像素上的四个点
-			int x1 = (int)fx;
-			int x2 = (x1 + 1) % m_width; //超过则移动开始位置
-			int y1 = (int)fx;
+			int x1 = x;
+			int x2 = (x1 + 1) % m_width; //超过则移到开始位置
+			int y1 = y;
 			int y2 = (y1 + 1) % m_height;
 
 			switch (m_format)
@@ -192,9 +156,9 @@ namespace SoftRenderer {
 				BYTE *pixel4 = line2 + deltaX2;
 
 				//每个像素的权重
-				float u1 = fx - x1;
+				float u1 = x - x1;
 				float u2 = 1.f - u1;
-				float v1 = fy - y1;
+				float v1 = y - y1;
 				float v2 = 1.f - v1;
 
 				//为了减少计算量  在这里进行颜色映射
@@ -227,9 +191,9 @@ namespace SoftRenderer {
 				BYTE *pixel4 = line2 + deltaX2;
 
 				//每个像素的权重
-				float u1 = fx - x1;
+				float u1 = x - x1;
 				float u2 = 1.f - u1;
-				float v1 = fy - y1;
+				float v1 = y - y1;
 				float v2 = 1.f - v1;
 
 				//为了减少计算量  在这里进行颜色映射
@@ -245,12 +209,15 @@ namespace SoftRenderer {
 				color.b = color.g = color.r = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
 				break;
 			default:
+                color.b = color.g = color.r = 0.f;
+                color.a = 1.f;
 				break;
 			}
 		}
 		else
 		{
-			color.b = color.g = color.r = 1.f;
+            color.b = color.g = color.r = 0.f;
+            color.a = 1.f;
 		}
     }
 
@@ -314,7 +281,7 @@ namespace SoftRenderer {
         m_pitch = 0;
     }
 
-	void Texture::CreateTexture(int width, int height, TextureFormat format)
+    void Texture::CreateTexture(int width, int height, TextureFormat format)
 	{
 		//先清除之前的纹理
 		Clear();
@@ -340,5 +307,80 @@ namespace SoftRenderer {
 			m_format = format;
 		}
 	}
+
+    void Texture::Sample2D(float x, float y, const SamplerState &state, vec4 &color)
+    {
+        if (NULL == m_data)
+        {
+            color = vec4(0.f, 0.f, 0.f, 1.f);
+            return;
+        }
+
+        switch (state.m_wrapMode)
+        {
+        case BORAD:
+            if (x < 0 || x > 1.f || y < 0 || y > 1.f)
+            {
+                color = state.m_boardColor;
+            }
+            break;
+        case CLAMP:
+            if (x < 0)
+            {
+                x = 0;
+            }
+
+            if ( x > 1.f)
+            {
+                x = 1.f;
+            }
+
+            if (y < 0)
+            {
+                y = 0.f;
+            }
+
+            if (y > 1.f)
+            {
+                y = 1.f;
+            }
+            break;
+        case WRAP:
+            while (x < 0)
+            {
+                x += 1;
+            }
+            while (x > 1.f)
+            {
+                x -= 1.f;
+            }
+            while (y < 0)
+            {
+                y = 0.f;
+            }
+            while (y > 1.f)
+            {
+                y -= 1.f;
+            }
+            break;
+        default:
+            break;
+        }
+
+        int u = x * (m_width - 1);
+        int v = x * (m_height - 1);
+
+        switch (state.m_filter)
+        {
+        case NEAREST:
+            getColorNearest(u, v, color);
+            break;
+        case Bilinear:
+            getColorBilinear(u, v, color);
+        default:
+            color = vec4(0.f, 0.f, 0.f, 1.f);
+            break;
+        }
+    }
 
 }

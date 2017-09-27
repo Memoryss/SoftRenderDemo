@@ -2,9 +2,11 @@
 #define __CAMERA_H__
 
 #include "type.h"
+#include "Frustum.h"
 
 namespace SoftRenderer
 {
+    class AABB;
     //UVNÏà»ú
 	class Camera
 	{
@@ -16,6 +18,8 @@ namespace SoftRenderer
 		void Move(const vec3 &targetPos);
 
 		void SetPerspective(float fov, float aspect, float near, float far);
+
+        bool IsVisibleInFrustum(const AABB &aabb) const;
 
 	private:
 		void calculateViewMatrix();
@@ -29,6 +33,8 @@ namespace SoftRenderer
 		mat4x4 m_viewMatrix;
 		mat4x4 m_projectMatrix;
 		mat4x4 m_viewPorjectMatrix;
+
+        Frustum m_frustum;
 	};
 }
 

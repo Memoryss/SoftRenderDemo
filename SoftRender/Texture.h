@@ -18,6 +18,26 @@ namespace SoftRenderer {
 		PS_32 = 32,
 	};
 
+    enum TextureFilter
+    {
+        NEAREST = 0,//最近点
+        Bilinear, //双线性
+    };
+
+    enum TextureWrapMode
+    {
+        WRAP = 0,
+        CLAMP,
+        BORAD,
+    };
+
+    struct SamplerState
+    {
+        TextureWrapMode m_wrapMode{ WRAP };
+        TextureFilter m_filter{ LINEAR };
+        vec4 m_boardColor{ 0.f, 0.f, 0.f, 1.f };
+    };
+
     class Texture
     {
     public:
@@ -29,10 +49,7 @@ namespace SoftRenderer {
 
 		void CreateTexture(int width, int height, TextureFormat format);
 
-		//最近点过滤
-        void GetColorNearest(float s, float t, vec3 &color);
-		//双线性过滤
-        void GetColorBilinear(float s, float t, vec3 &color);
+        void Sample2D(float x, float y, const SamplerState &state, vec4 &color);
 
         float GetShadowNearest(vec4 &texcoord);
         float GetShadowBilinear(vec4 &texcoord);
@@ -46,6 +63,11 @@ namespace SoftRenderer {
 
     private:
         void init();
+
+        //最近点过滤
+        void getColorNearest(int s, int t, vec4 &color);
+        //双线性过滤
+        void getColorBilinear(int s, int t, vec4 &color);
 
     private:
         void *m_data;   //数据

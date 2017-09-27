@@ -73,19 +73,4 @@ namespace SoftRenderer
 		return m_bilinearTextureFiltering;
 	}
 
-	void SoftwareRenderState::SetTexture(Texture *texture)
-	{
-		if (0 == texture)
-		{
-			return;
-		}
-
-		m_texture = texture;
-	}
-
-	Texture * SoftwareRenderState::GetTexture()
-	{
-		return m_texture;
-	}
-
 }
