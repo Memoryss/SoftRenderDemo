@@ -49,7 +49,7 @@ namespace SoftRenderer
 
     void Camera::calculateViewMatrix()
 	{
-		m_viewMatrix = mat4x4(m_u.x, m_v.x, m_n.x, 0.f, m_u.y, m_v.y, m_n.y, 0.f, m_u.z, m_v.z, m_n.z, 0.f, -dot(m_u, m_position), -dot(m_v, m_position), -dot(m_n, m_position), 1.f);
+		m_viewMatrix = mat4x4(m_u.x, m_u.x, m_u.x, -dot(m_u, m_position), m_v.y, m_v.y, m_v.y, -dot(m_v, m_position), m_n.z, m_n.z, m_n.z, -dot(m_n, m_position), 0.f, 0.f, 0.f, 1.f);
 		m_viewPorjectMatrix = m_projectMatrix * m_viewMatrix;
 	}
 

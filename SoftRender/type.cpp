@@ -398,20 +398,12 @@ namespace SoftRenderer
         }
     }
 
-    mat4x4::mat4x4(const vec4 &col1, const vec4 &col2, const vec4 &col3, const vec4 &col4)
+    mat4x4::mat4x4(float r1c1, float r1c2, float r1c3, float r1c4, float r2c1, float r2c2, float r2c3, float r2c4, float r3c1, float r3c2, float r3c3, float r3c4, float r4c1, float r4c2, float r4c3, float r4c4)
     {
-        m[0] = col1.x; m[4] = col2.x; m[8] = col3.x; m[12] = col4.x;
-        m[1] = col1.y; m[5] = col2.y; m[9] = col3.y; m[13] = col4.y;
-        m[2] = col1.z; m[6] = col2.z; m[10] = col3.z; m[14] = col4.z;
-        m[3] = col1.w; m[7] = col2.w; m[11] = col3.w; m[15] = col4.w;
-    }
-
-    mat4x4::mat4x4(float c1r1, float c1r2, float c1r3, float c1r4, float c2r1, float c2r2, float c2r3, float c2r4, float c3r1, float c3r2, float c3r3, float c3r4, float c4r1, float c4r2, float c4r3, float c4r4)
-    {
-        m[0] = c1r1; m[4] = c2r1; m[8] = c3r1; m[12] = c4r1;
-        m[1] = c1r2; m[5] = c2r2; m[9] = c3r2; m[13] = c4r2;
-        m[2] = c1r3; m[6] = c2r3; m[10] = c3r3; m[14] = c4r3;
-        m[3] = c1r4; m[7] = c2r4; m[11] = c3r4; m[15] = c4r4;
+        m[0] = r1c1; m[4] = r2c1; m[8] = r3c1; m[12] = r4c1;
+        m[1] = r1c2; m[5] = r2c2; m[9] = r3c2; m[13] = r4c2;
+        m[2] = r1c3; m[6] = r2c3; m[10] = r3c3; m[14] = r4c3;
+        m[3] = r1c4; m[7] = r2c4; m[11] = r3c4; m[15] = r4c4;
     }
 
     mat4x4::mat4x4(const mat2x2 &Matrix)
@@ -452,36 +444,53 @@ namespace SoftRenderer
 
     mat4x4 operator * (const mat4x4 &Matrix1, const mat4x4 &Matrix2)
     {
-        mat4x4 Matrix3;
+        mat4x4 matrix3;
 
-        Matrix3.m[0] = Matrix1.m[0] * Matrix2.m[0] + Matrix1.m[4] * Matrix2.m[1] + Matrix1.m[8] * Matrix2.m[2] + Matrix1.m[12] * Matrix2.m[3];
-        Matrix3.m[1] = Matrix1.m[1] * Matrix2.m[0] + Matrix1.m[5] * Matrix2.m[1] + Matrix1.m[9] * Matrix2.m[2] + Matrix1.m[13] * Matrix2.m[3];
-        Matrix3.m[2] = Matrix1.m[2] * Matrix2.m[0] + Matrix1.m[6] * Matrix2.m[1] + Matrix1.m[10] * Matrix2.m[2] + Matrix1.m[14] * Matrix2.m[3];
-        Matrix3.m[3] = Matrix1.m[3] * Matrix2.m[0] + Matrix1.m[7] * Matrix2.m[1] + Matrix1.m[11] * Matrix2.m[2] + Matrix1.m[15] * Matrix2.m[3];
-        Matrix3.m[4] = Matrix1.m[0] * Matrix2.m[4] + Matrix1.m[4] * Matrix2.m[5] + Matrix1.m[8] * Matrix2.m[6] + Matrix1.m[12] * Matrix2.m[7];
-        Matrix3.m[5] = Matrix1.m[1] * Matrix2.m[4] + Matrix1.m[5] * Matrix2.m[5] + Matrix1.m[9] * Matrix2.m[6] + Matrix1.m[13] * Matrix2.m[7];
-        Matrix3.m[6] = Matrix1.m[2] * Matrix2.m[4] + Matrix1.m[6] * Matrix2.m[5] + Matrix1.m[10] * Matrix2.m[6] + Matrix1.m[14] * Matrix2.m[7];
-        Matrix3.m[7] = Matrix1.m[3] * Matrix2.m[4] + Matrix1.m[7] * Matrix2.m[5] + Matrix1.m[11] * Matrix2.m[6] + Matrix1.m[15] * Matrix2.m[7];
-        Matrix3.m[8] = Matrix1.m[0] * Matrix2.m[8] + Matrix1.m[4] * Matrix2.m[9] + Matrix1.m[8] * Matrix2.m[10] + Matrix1.m[12] * Matrix2.m[11];
-        Matrix3.m[9] = Matrix1.m[1] * Matrix2.m[8] + Matrix1.m[5] * Matrix2.m[9] + Matrix1.m[9] * Matrix2.m[10] + Matrix1.m[13] * Matrix2.m[11];
-        Matrix3.m[10] = Matrix1.m[2] * Matrix2.m[8] + Matrix1.m[6] * Matrix2.m[9] + Matrix1.m[10] * Matrix2.m[10] + Matrix1.m[14] * Matrix2.m[11];
-        Matrix3.m[11] = Matrix1.m[3] * Matrix2.m[8] + Matrix1.m[7] * Matrix2.m[9] + Matrix1.m[11] * Matrix2.m[10] + Matrix1.m[15] * Matrix2.m[11];
-        Matrix3.m[12] = Matrix1.m[0] * Matrix2.m[12] + Matrix1.m[4] * Matrix2.m[13] + Matrix1.m[8] * Matrix2.m[14] + Matrix1.m[12] * Matrix2.m[15];
-        Matrix3.m[13] = Matrix1.m[1] * Matrix2.m[12] + Matrix1.m[5] * Matrix2.m[13] + Matrix1.m[9] * Matrix2.m[14] + Matrix1.m[13] * Matrix2.m[15];
-        Matrix3.m[14] = Matrix1.m[2] * Matrix2.m[12] + Matrix1.m[6] * Matrix2.m[13] + Matrix1.m[10] * Matrix2.m[14] + Matrix1.m[14] * Matrix2.m[15];
-        Matrix3.m[15] = Matrix1.m[3] * Matrix2.m[12] + Matrix1.m[7] * Matrix2.m[13] + Matrix1.m[11] * Matrix2.m[14] + Matrix1.m[15] * Matrix2.m[15];
+        typedef float(*p)[4];
 
-        return Matrix3;
+        const p mp1 = (const p)Matrix1.m;
+        const p mp2 = (const p)Matrix2.m;
+        p mp3 = (p)matrix3.m;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                mp3[i][j] += mp1[i][0] * mp2[0][j];
+                mp3[i][j] += mp1[i][1] * mp2[1][j];
+                mp3[i][j] += mp1[i][2] * mp2[2][j];
+                mp3[i][j] += mp1[i][3] * mp2[3][j];
+            }
+        }
+        /*
+        Matrix3.m[0] = Matrix1.m[0] * Matrix2.m[0] + Matrix1.m[1] * Matrix2.m[4] + Matrix1.m[2] * Matrix2.m[8] + Matrix1.m[3] * Matrix2.m[12];
+        Matrix3.m[1] = Matrix1.m[0] * Matrix2.m[1] + Matrix1.m[5] * Matrix2.m[5] + Matrix1.m[9] * Matrix2.m[9] + Matrix1.m[13] * Matrix2.m[13];
+        Matrix3.m[2] = Matrix1.m[0] * Matrix2.m[2] + Matrix1.m[6] * Matrix2.m[6] + Matrix1.m[10] * Matrix2.m[10] + Matrix1.m[14] * Matrix2.m[14];
+        Matrix3.m[3] = Matrix1.m[0] * Matrix2.m[3] + Matrix1.m[7] * Matrix2.m[1] + Matrix1.m[11] * Matrix2.m[2] + Matrix1.m[15] * Matrix2.m[3];
+        Matrix3.m[4] = Matrix1.m[4] * Matrix2.m[0] + Matrix1.m[4] * Matrix2.m[5] + Matrix1.m[8] * Matrix2.m[6] + Matrix1.m[12] * Matrix2.m[7];
+        Matrix3.m[5] = Matrix1.m[4] * Matrix2.m[1] + Matrix1.m[5] * Matrix2.m[5] + Matrix1.m[9] * Matrix2.m[6] + Matrix1.m[13] * Matrix2.m[7];
+        Matrix3.m[6] = Matrix1.m[4] * Matrix2.m[2] + Matrix1.m[6] * Matrix2.m[5] + Matrix1.m[10] * Matrix2.m[6] + Matrix1.m[14] * Matrix2.m[7];
+        Matrix3.m[7] = Matrix1.m[4] * Matrix2.m[3] + Matrix1.m[7] * Matrix2.m[5] + Matrix1.m[11] * Matrix2.m[6] + Matrix1.m[15] * Matrix2.m[7];
+        Matrix3.m[8] = Matrix1.m[8] * Matrix2.m[0] + Matrix1.m[4] * Matrix2.m[9] + Matrix1.m[8] * Matrix2.m[10] + Matrix1.m[12] * Matrix2.m[11];
+        Matrix3.m[9] = Matrix1.m[8] * Matrix2.m[1] + Matrix1.m[5] * Matrix2.m[9] + Matrix1.m[9] * Matrix2.m[10] + Matrix1.m[13] * Matrix2.m[11];
+        Matrix3.m[10] = Matrix1.m[8] * Matrix2.m[2] + Matrix1.m[6] * Matrix2.m[9] + Matrix1.m[10] * Matrix2.m[10] + Matrix1.m[14] * Matrix2.m[11];
+        Matrix3.m[11] = Matrix1.m[8] * Matrix2.m[3] + Matrix1.m[7] * Matrix2.m[9] + Matrix1.m[11] * Matrix2.m[10] + Matrix1.m[15] * Matrix2.m[11];
+        Matrix3.m[12] = Matrix1.m[12] * Matrix2.m[0] + Matrix1.m[4] * Matrix2.m[13] + Matrix1.m[8] * Matrix2.m[14] + Matrix1.m[12] * Matrix2.m[15];
+        Matrix3.m[13] = Matrix1.m[12] * Matrix2.m[1] + Matrix1.m[5] * Matrix2.m[13] + Matrix1.m[9] * Matrix2.m[14] + Matrix1.m[13] * Matrix2.m[15];
+        Matrix3.m[14] = Matrix1.m[12] * Matrix2.m[2] + Matrix1.m[6] * Matrix2.m[13] + Matrix1.m[10] * Matrix2.m[14] + Matrix1.m[14] * Matrix2.m[15];
+        Matrix3.m[15] = Matrix1.m[12] * Matrix2.m[3] + Matrix1.m[7] * Matrix2.m[13] + Matrix1.m[11] * Matrix2.m[14] + Matrix1.m[15] * Matrix2.m[15];
+        */
+        return matrix3;
     }
 
     vec4 operator * (const mat4x4 &Matrix, const vec4 &u)
     {
         vec4 v;
 
-        v.x = Matrix.m[0] * u.x + Matrix.m[4] * u.y + Matrix.m[8] * u.z + Matrix.m[12] * u.w;
-        v.y = Matrix.m[1] * u.x + Matrix.m[5] * u.y + Matrix.m[9] * u.z + Matrix.m[13] * u.w;
-        v.z = Matrix.m[2] * u.x + Matrix.m[6] * u.y + Matrix.m[10] * u.z + Matrix.m[14] * u.w;
-        v.w = Matrix.m[3] * u.x + Matrix.m[7] * u.y + Matrix.m[11] * u.z + Matrix.m[15] * u.w;
+        v.x = Matrix.m[0] * u.x + Matrix.m[1] * u.y + Matrix.m[2] * u.z + Matrix.m[3] * u.w;
+        v.y = Matrix.m[4] * u.x + Matrix.m[5] * u.y + Matrix.m[6] * u.z + Matrix.m[7] * u.w;
+        v.z = Matrix.m[8] * u.x + Matrix.m[9] * u.y + Matrix.m[10] * u.z + Matrix.m[11] * u.w;
+        v.w = Matrix.m[12] * u.x + Matrix.m[13] * u.y + Matrix.m[14] * u.z + Matrix.m[15] * u.w;
 
         return v;
     }
@@ -489,9 +498,9 @@ namespace SoftRenderer
     vec3 operator * (const mat4x4 &Matrix, const vec3 &u)
     {
         vec3 v;
-        v.x = Matrix.m[0] * u.x + Matrix.m[4] * u.y + Matrix.m[8] * u.z + Matrix.m[12] * 1.f;
-        v.y = Matrix.m[1] * u.x + Matrix.m[5] * u.y + Matrix.m[9] * u.z + Matrix.m[13] * 1.f;
-        v.z = Matrix.m[2] * u.x + Matrix.m[6] * u.y + Matrix.m[10] * u.z + Matrix.m[14] * 1.f;
+        v.x = Matrix.m[0] * u.x + Matrix.m[1] * u.y + Matrix.m[2] * u.z + Matrix.m[3] * 1.f;
+        v.y = Matrix.m[4] * u.x + Matrix.m[5] * u.y + Matrix.m[6] * u.z + Matrix.m[7] * 1.f;
+        v.z = Matrix.m[8] * u.x + Matrix.m[8] * u.y + Matrix.m[10] * u.z + Matrix.m[11] * 1.f;
 
         return v;
     }
@@ -605,7 +614,7 @@ namespace SoftRenderer
     {
         mat4x4 Perspective;
 
-        float coty = 1.0f / tan(fovy * (float)M_PI / 360.0f);
+        float coty = 1.0f / tan(fovy);
 
         Perspective.m[0] = coty / aspect;
         Perspective.m[1] = 0.0f;
@@ -620,7 +629,7 @@ namespace SoftRenderer
         Perspective.m[8] = 0.0f;
         Perspective.m[9] = 0.0f;
         Perspective.m[10] = (n + f) / (n - f);
-        Perspective.m[11] = -1.0f;
+        Perspective.m[11] = 1.0f;
 
         Perspective.m[12] = 0.0f;
         Perspective.m[13] = 0.0f;

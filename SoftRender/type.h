@@ -236,13 +236,12 @@ namespace SoftRenderer {
     class mat4x4
     {
     public:
-        float m[16];
+        float m[16] = {0.f};
         mat4x4();
         mat4x4(float num);
         ~mat4x4();
         mat4x4(const mat4x4 &Matrix);
-        mat4x4(const vec4 &col1, const vec4 &col2, const vec4 &col3, const vec4 &col4);
-        mat4x4(float c1r1, float c1r2, float c1r3, float c1r4, float c2r1, float c2r2, float c2r3, float c2r4, float c3r1, float c3r2, float c3r3, float c3r4, float c4r1, float c4r2, float c4r3, float c4r4);
+        mat4x4(float r1c1, float r1c2, float r1c3, float r1c4, float r2c1, float r2c2, float r2c3, float r2c4, float r3c1, float r3c2, float r3c3, float r3c4, float r4c1, float r4c2, float r4c3, float r4c4);
         explicit mat4x4(const mat2x2 &Matrix);
         explicit mat4x4(const mat3x3 &Matrix);
         mat4x4& operator = (const mat4x4 &Matrix);
