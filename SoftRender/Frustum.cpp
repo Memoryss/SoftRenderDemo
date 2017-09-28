@@ -47,14 +47,14 @@ namespace SoftRenderer {
         UpdateVertices(near, far, transform);
 	}
 
-	Intersection Frustum::IsInside(const vec3 & point)
+	Intersection Frustum::IsInside(const vec3 & point) const
 	{
-		return Intersection();
+		return OUTSIDE;
 	}
 
-	Intersection Frustum::IsInside(const AABB & box)
+	Intersection Frustum::IsInside(const AABB & box) const
 	{
-		return Intersection();
+		return OUTSIDE;
 	}
 
 	void Frustum::UpdatePlanes()

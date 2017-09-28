@@ -4,3 +4,6 @@
 
 /.vs/SoftRender/v15
 /SoftRender/x64/Debug
+/Debug
+/SoftRender/Debug
+/x64/Debug

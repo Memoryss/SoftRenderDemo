@@ -489,9 +489,11 @@ namespace SoftRenderer
     vec3 operator * (const mat4x4 &Matrix, const vec3 &u)
     {
         vec3 v;
-        v.x = Matrix.m[0] * u.x + Matrix.m[4] * u.y + Matrix.m[8] * u.z + Matrix.m[12] * u.w;
-        v.y = Matrix.m[1] * u.x + Matrix.m[5] * u.y + Matrix.m[9] * u.z + Matrix.m[13] * u.w;
-        v.z = Matrix.m[2] * u.x + Matrix.m[6] * u.y + Matrix.m[10] * u.z + Matrix.m[14] * u.w;
+        v.x = Matrix.m[0] * u.x + Matrix.m[4] * u.y + Matrix.m[8] * u.z + Matrix.m[12] * 1.f;
+        v.y = Matrix.m[1] * u.x + Matrix.m[5] * u.y + Matrix.m[9] * u.z + Matrix.m[13] * 1.f;
+        v.z = Matrix.m[2] * u.x + Matrix.m[6] * u.y + Matrix.m[10] * u.z + Matrix.m[14] * 1.f;
+
+        return v;
     }
 
     mat4x4 BiasMatrix = mat4x4(0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f);

@@ -434,8 +434,8 @@ namespace SoftRenderer
 
             //画上半部分
             int start_y = a.y, end_y = c.y;
-            start_y = std::max(start_y, 0);
-            end_y = std::min(end_y, m_height);
+            start_y = max(start_y, 0);
+            end_y = min(end_y, m_height);
 
             while (start_y < end_y)
             {
@@ -457,8 +457,8 @@ namespace SoftRenderer
                     std::swap(v1, v2);
                 }
 
-                int start_x = std::max(x1, 0);
-                int end_x = std::max(x2, m_width);
+                int start_x = max(x1, 0);
+                int end_x = min(x2, m_width);
 
                 for (int x = start_x; x < end_x; ++x)
                 {
@@ -478,7 +478,7 @@ namespace SoftRenderer
 
             //画下半部分
             vec2i cb(b.x - c.x, b.y - c.y);
-            end_y = std::min(b.y, m_height);
+            end_y = min(b.y, m_height);
 
             while (start_y < end_y)
             {
@@ -496,8 +496,8 @@ namespace SoftRenderer
                     std::swap(x1, x2);
                 }
 
-                int start_x = std::max(x1, 0);
-                int end_x = std::min(x2, m_width);
+                int start_x = max(x1, 0);
+                int end_x = min(x2, m_width);
 
                 for (int x = start_x; x < end_x; ++x)
                 {
@@ -522,8 +522,8 @@ namespace SoftRenderer
 
             //画上半部分
 			int start_y = a.y, end_y = b.y;
-			start_y = std::max(0, start_y);
-			end_y = std::min(m_height, end_y);
+			start_y = max(0, start_y);
+			end_y = min(m_height, end_y);
 			
 			while (start_y < end_y)
 			{
@@ -543,8 +543,8 @@ namespace SoftRenderer
 					std::swap(v1, v2);
 				}
 
-				int start_x = std::max(0, x1);
-				int end_x = std::min(m_width, x2);
+				int start_x = max(0, x1);
+				int end_x = min(m_width, x2);
 				for (int x = x1; x < x2; ++x)
 				{
 					float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
@@ -559,7 +559,7 @@ namespace SoftRenderer
 
 			//画下半部分
 			vec2i bc(c.x - b.x, c.y - b.y);
-			end_y = std::min(m_height, c.y);
+			end_y = min(m_height, c.y);
 			while (start_y < end_y)
 			{
 				float ratio_bc = bc.y > 0 ? (float)(start_y - b.y) / bc.y : 1;
@@ -577,8 +577,8 @@ namespace SoftRenderer
 					std::swap(v1, v2);
 				}
 
-				int start_x = std::max(x1, 0);
-				int end_x = std::min(x2, m_height);
+				int start_x = max(x1, 0);
+				int end_x = min(x2, m_height);
 				for (int x = start_x; x < end_x; ++x)
 				{
 					int ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;

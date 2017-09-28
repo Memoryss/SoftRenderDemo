@@ -3,7 +3,7 @@
 
 #include "type.h"
 
-typedef unsigned int uint32_t
+typedef unsigned int uint32_t;
 
 namespace SoftRenderer {
 

@@ -115,7 +115,7 @@ namespace SoftRenderer
         vec3 *normals = NULL;
         if (normals > 0)
         {
-            normals = new vec3[normalCount]£»
+            normals = new vec3[normalCount];
         }
 
         m_verticeCount = triangleCount * 3;
@@ -348,11 +348,11 @@ namespace SoftRenderer
                 success = m_texture.LoadTexture(texturePath.c_str());
             }
 
-            while (line < end & *line != 0)
+            while (line < end && *line != 0)
             {
                 ++line;
             }
-            while (line < end & *line == 0)
+            while (line < end && *line == 0)
             {
                 ++line;
             }

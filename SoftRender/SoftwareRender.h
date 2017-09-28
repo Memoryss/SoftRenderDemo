@@ -6,14 +6,13 @@
 #include "type.h"
 #include "SoftwareRenderContext.h"
 #include "SoftwareRenderState.h"
+#include "Vertex.h"
 
 namespace SoftRenderer
 {
     class FrameBuffer;
     class Texture;
-    class Vertex;
-    class RenderBuffer;
-    class SoftwareRenderContext;
+    struct RenderBuffer;
     class Light;
     class Camera;
     class Shader;

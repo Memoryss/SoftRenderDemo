@@ -99,6 +99,8 @@ void * DiskFile::GetData()
         m_data = new BYTE[size + 1];
 
     }
+
+    return m_data;
 }
 
 void DiskFile::Close()

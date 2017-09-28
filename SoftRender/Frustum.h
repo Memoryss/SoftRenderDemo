@@ -18,13 +18,6 @@ namespace SoftRenderer {
 		PLANE_DOWN,
 	};
 
-    enum Intersection
-    {
-        OUTSIDE,
-        INTERSECTS,
-        INSIDE
-    };
-
 	static const uint32_t FRUSTUM_NUM_PLANES = 6;
 	static const uint32_t FRUSTUM_NUM_VECTICES = 8;
 
@@ -41,9 +34,9 @@ namespace SoftRenderer {
 
 		void SetFrustum(float fov, float aspectRatio, float nearZ, float farZ, const mat4x4 &transform);
 
-		Intersection IsInside(const vec3 &point);
+		Intersection IsInside(const vec3 &point) const;
 
-		Intersection IsInside(const AABB &box);
+		Intersection IsInside(const AABB &box) const;
 
 		void UpdatePlanes();
 

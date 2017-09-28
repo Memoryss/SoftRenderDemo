@@ -21,6 +21,8 @@ namespace SoftRenderer
         m_hwnd = hWnd;
         m_width = w;
         m_height = h;
+
+        return true;
     }
 
     void SoftwareRenderApp::Resize(int w, int h)

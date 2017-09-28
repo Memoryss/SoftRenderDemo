@@ -1,12 +1,12 @@
 #include "AABB.h"
 
-namespace Hope {
+namespace SoftRenderer {
 
     AABB::AABB() : m_max(-INT_MAX, -INT_MAX, -INT_MAX), m_min(INT_MAX, INT_MAX, INT_MAX)
     {
     }
 
-    AABB::AABB(const glm::vec3 & min, const glm::vec3 & max) : m_min(min), m_max(max)
+    AABB::AABB(const vec3 & min, const vec3 & max) : m_min(min), m_max(max)
     {
 
     }
@@ -16,7 +16,7 @@ namespace Hope {
         
     }
 
-    AABB::AABB(glm::vec3 * vertices, uint32_t count)
+    AABB::AABB(vec3 * vertices, uint32_t count)
     {
         UpdateAABB(vertices, count);
     }
@@ -26,7 +26,7 @@ namespace Hope {
 
     }
 
-    void AABB::UpdateAABB(glm::vec3 * vertices, uint32_t count)
+    void AABB::UpdateAABB(vec3 * vertices, uint32_t count)
     {
         if (!vertices || count)
         {
@@ -34,25 +34,25 @@ namespace Hope {
         }
 
         uint32_t min_index = 0, max_index = 0;
-        computeDisByDir(glm::vec3(1, 0, 0), vertices, count, min_index, max_index);
+        computeDisByDir(vec3(1, 0, 0), vertices, count, min_index, max_index);
         m_min.x = vertices[min_index].x;
         m_max.x = vertices[max_index].x;
 
-        computeDisByDir(glm::vec3(0, 1, 0), vertices, count, min_index, max_index);
+        computeDisByDir(vec3(0, 1, 0), vertices, count, min_index, max_index);
         m_min.y = vertices[min_index].y;
         m_max.y = vertices[max_index].y;
 
-        computeDisByDir(glm::vec3(0, 0, 1), vertices, count, min_index, max_index);
+        computeDisByDir(vec3(0, 0, 1), vertices, count, min_index, max_index);
         m_min.z = vertices[min_index].z;
         m_max.z = vertices[max_index].z;
     }
 
-    void AABB::computeDisByDir(const glm::vec3 & dir, glm::vec3 * vertices, uint32_t count, uint32_t & min, uint32_t & max)
+    void AABB::computeDisByDir(const vec3 & dir, vec3 * vertices, uint32_t count, uint32_t & min, uint32_t & max)
     {
         float maxProj = -FLT_MAX, minProj = FLT_MAX;
         for (uint32_t i = 0; i < count; ++i)
         {
-             float proj = glm::dot(vertices[i], dir);
+             float proj = dot(vertices[i], dir);
              if (proj > maxProj)
              {
                  maxProj = proj;
@@ -67,7 +67,7 @@ namespace Hope {
         }
     }
 
-    Intersection AABB::IsIntersect(const glm::vec3 & point)
+    Intersection AABB::IsIntersect(const vec3 & point)
     {
         if (point.x < m_min.x || point.x > m_max.x || point.y < m_min.y || point.y > m_max.y || point.z < m_min.z || point.z > m_max.z)
         {

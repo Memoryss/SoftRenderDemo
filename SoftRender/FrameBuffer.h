@@ -18,8 +18,8 @@ namespace SoftRenderer
 
 
 	private:
-		Texture *m_colorTexture{ NULL };
-		Texture *m_depthTexture{ NULL };
+		Texture *m_colorTexture{ 0 };
+		Texture *m_depthTexture{ 0 };
 	};
 
 }

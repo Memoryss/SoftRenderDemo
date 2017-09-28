@@ -93,18 +93,21 @@ namespace SoftRenderer {
 			}
 		}
 		FreeImage_Unload(dib);
+
+        return true;
     }
 
     void Texture::getColorNearest(int x, int y, vec4 &color)
     {
 		if (NULL != m_data)
 		{
+            BYTE *b;
 			switch (m_format)
 			{
 			case SoftRenderer::TF_NONE:
 				break;
 			case SoftRenderer::TF_BGR24:
-				BYTE *b = (BYTE *)m_data + y * m_pitch + x * 3;
+				b = (BYTE *)m_data + y * m_pitch + x * 3;
 				
 				color.b = *b * CD_255;
 				++b;
@@ -113,7 +116,7 @@ namespace SoftRenderer {
 				color.r = *b * CD_255;
 				break;
 			case SoftRenderer::TF_DEPTH16:
-				BYTE *b = (BYTE *)m_data + y * m_pitch + x * 2;
+				b = (BYTE *)m_data + y * m_pitch + x * 2;
 				color.b = color.g = color.r = *b * CD_65535;
 				break;
 			default:
@@ -144,69 +147,72 @@ namespace SoftRenderer {
 			case SoftRenderer::TF_NONE:
 				break;
 			case SoftRenderer::TF_BGR24:
-				BYTE *line1 = (BYTE *)m_data + m_pitch * y1;
-				BYTE *line2 = (BYTE *)m_data + m_pitch * y2;
+            {
+                BYTE *line1 = (BYTE *)m_data + m_pitch * y1;
+                BYTE *line2 = (BYTE *)m_data + m_pitch * y2;
 
-				int deltaX1 = x1 * 3;
-				int deltaX2 = x2 * 3;
+                int deltaX1 = x1 * 3;
+                int deltaX2 = x2 * 3;
 
-				BYTE *pixel1 = line1 + deltaX1;
-				BYTE *pixel2 = line1 + deltaX2;
-				BYTE *pixel3 = line2 + deltaX1;
-				BYTE *pixel4 = line2 + deltaX2;
+                BYTE *pixel1 = line1 + deltaX1;
+                BYTE *pixel2 = line1 + deltaX2;
+                BYTE *pixel3 = line2 + deltaX1;
+                BYTE *pixel4 = line2 + deltaX2;
 
-				//每个像素的权重
-				float u1 = x - x1;
-				float u2 = 1.f - u1;
-				float v1 = y - y1;
-				float v2 = 1.f - v1;
+                //每个像素的权重
+                float u1 = x - x1;
+                float u2 = 1.f - u1;
+                float v1 = y - y1;
+                float v2 = 1.f - v1;
 
-				//为了减少计算量  在这里进行颜色映射
-				u1 *= CD_255;
-				u2 *= CD_255;
+                //为了减少计算量  在这里进行颜色映射
+                u1 *= CD_255;
+                u2 *= CD_255;
 
-				float u1v1 = u1 * v1;
-				float u1v2 = u1 * v2;
-				float u2v1 = u2 * v1;
-				float u2v2 = u2 * v2;
+                float u1v1 = u1 * v1;
+                float u1v2 = u1 * v2;
+                float u2v1 = u2 * v1;
+                float u2v2 = u2 * v2;
 
-				//加权平均值
-				color.b = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
-				++pixel1; ++pixel2; ++pixel3; ++pixel4;
-				color.g = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
-				++pixel1; ++pixel2; ++pixel3; ++pixel4;
-				color.r = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
-
+                //加权平均值
+                color.b = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
+                ++pixel1; ++pixel2; ++pixel3; ++pixel4;
+                color.g = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
+                ++pixel1; ++pixel2; ++pixel3; ++pixel4;
+                color.r = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
+            }
 				break;
 			case SoftRenderer::TF_DEPTH16:
-				BYTE *line1 = (BYTE *)m_data + m_pitch * y1;
-				BYTE *line2 = (BYTE *)m_data + m_pitch * y2;
+            {
+                BYTE *line1 = (BYTE *)m_data + m_pitch * y1;
+                BYTE *line2 = (BYTE *)m_data + m_pitch * y2;
 
-				int deltaX1 = x1 * 2;
-				int deltaX2 = x2 * 2;
+                int deltaX1 = x1 * 2;
+                int deltaX2 = x2 * 2;
 
-				BYTE *pixel1 = line1 + deltaX1;
-				BYTE *pixel2 = line1 + deltaX2;
-				BYTE *pixel3 = line2 + deltaX1;
-				BYTE *pixel4 = line2 + deltaX2;
+                BYTE *pixel1 = line1 + deltaX1;
+                BYTE *pixel2 = line1 + deltaX2;
+                BYTE *pixel3 = line2 + deltaX1;
+                BYTE *pixel4 = line2 + deltaX2;
 
-				//每个像素的权重
-				float u1 = x - x1;
-				float u2 = 1.f - u1;
-				float v1 = y - y1;
-				float v2 = 1.f - v1;
+                //每个像素的权重
+                float u1 = x - x1;
+                float u2 = 1.f - u1;
+                float v1 = y - y1;
+                float v2 = 1.f - v1;
 
-				//为了减少计算量  在这里进行颜色映射
-				u1 *= CD_255;
-				u2 *= CD_255;
+                //为了减少计算量  在这里进行颜色映射
+                u1 *= CD_255;
+                u2 *= CD_255;
 
-				float u1v1 = u1 * v1;
-				float u1v2 = u1 * v2;
-				float u2v1 = u2 * v1;
-				float u2v2 = u2 * v2;
+                float u1v1 = u1 * v1;
+                float u1v2 = u1 * v2;
+                float u2v1 = u2 * v1;
+                float u2v2 = u2 * v2;
 
-				//加权平均值
-				color.b = color.g = color.r = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
+                //加权平均值
+                color.b = color.g = color.r = *pixel1 * u1v1 + *pixel2 * u2v1 + *pixel3 * u1v2 + *pixel4 * u2v2;
+            }
 				break;
 			default:
                 color.b = color.g = color.r = 0.f;
@@ -224,11 +230,13 @@ namespace SoftRenderer {
     float Texture::GetShadowNearest(vec4 &texcoord)
     {
 		//TODO
+        return 0.f;
     }
 
     float Texture::GetShadowBilinear(vec4 &texcoord)
     {
 		//TODO
+        return 0.f;
     }
 
     void Texture::Clear()
@@ -258,7 +266,7 @@ namespace SoftRenderer {
 
     int Texture::GetHeight() const
     {
-        return m_height
+        return m_height;
     }
 
     void * Texture::GetData() const

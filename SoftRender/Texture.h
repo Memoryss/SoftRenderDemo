@@ -34,7 +34,7 @@ namespace SoftRenderer {
     struct SamplerState
     {
         TextureWrapMode m_wrapMode{ WRAP };
-        TextureFilter m_filter{ LINEAR };
+        TextureFilter m_filter{ Bilinear };
         vec4 m_boardColor{ 0.f, 0.f, 0.f, 1.f };
     };
 

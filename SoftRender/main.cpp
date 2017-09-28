@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "Shader.h"
 
+#pragma comment(lib, "FreeImage.lib")
+
 using namespace SoftRenderer;
 
 void fillVertex(vec3 pos, vec3 normal, vec2 uv, vec4 color, Vertex *vertex)
@@ -133,7 +135,7 @@ public:
         v_out->normal = v_in->normal;
         v_out->color = v_in->color;
         v_out->texcoord = v_in->texcoord;
-        v_out->position = m_projMatrix * v_out->position;
+        v_out->position = m_projMatrix * v_in->position;
     }
 
     virtual bool FragmentShader(RasterizerVertex *v_io)
@@ -190,6 +192,7 @@ public:
         state.m_filter = Bilinear;
         state.m_wrapMode = WRAP;
         m_shader.SetSampleState(state);
+        m_shader.SetProjMatrix(m_camera->m_viewPorjectMatrix);
 
         //ÉèÖÃäÖÈ¾×´Ì¬
         SoftwareRenderState rState;
@@ -198,6 +201,8 @@ public:
         rState.SetDepthTestType(DTT_LessEqual);
         rState.EnableDepthMask(true);
         m_render->SetRenderState(rState);
+
+        m_render->SetShader(&m_shader);
 
         m_render->Render(m_renderBuffer);
 
@@ -302,7 +307,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     int xpos = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
     int ypos = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
 
-    HWND hWnd = CreateWindow(WIN32_CLASS_NAME, "SoftRender", style,
+    HWND hWnd = CreateWindow(WIN32_CLASS_NAME, L"SoftRender", style,
         xpos, ypos, width, height,
         NULL, NULL, hInstance, NULL);
 
