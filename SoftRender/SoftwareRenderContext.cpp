@@ -35,15 +35,17 @@ namespace SoftRenderer
                 BYTE g = (BYTE)(buffer[j].g * 255);
                 BYTE b = (BYTE)(buffer[j].b * 255);
 
-                pixels[i * 3 + 0] = b;
-                pixels[i * 3 + 1] = g;
-                pixels[i * 3 + 2] = r;
+                pixels[j * 3 + 0] = b;
+                pixels[j * 3 + 1] = g;
+                pixels[j * 3 + 2] = r;
             }
+
+            
 
             pixels += m_linePatch;
             buffer += m_width;
         }
-
+        
         HDC hdc = GetDC(m_hwnd);
         BitBlt(hdc, 0, 0, m_width, m_height, m_offscreenDC, 0, 0, SRCCOPY);
 

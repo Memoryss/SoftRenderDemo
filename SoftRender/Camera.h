@@ -28,7 +28,7 @@ namespace SoftRenderer
         vec3 m_u{ 1.f, 0.f, 0.f };
         vec3 m_v{ 0.f, 1.f, 0.f };
         vec3 m_n{ 0.f, 0.f, 1.f };
-        vec3 m_position{ 0.f, 0.f, 5.f };
+        vec3 m_position{ 0.f, 3.f, -3.f };
 
 		mat4x4 m_viewMatrix;
 		mat4x4 m_projectMatrix;

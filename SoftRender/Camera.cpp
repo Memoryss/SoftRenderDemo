@@ -20,11 +20,11 @@ namespace SoftRenderer
 
         //构建u
         vec3 u = normalize(up);
-        temp = cross(m_n, u);
+        temp = cross(u, m_n);
         m_u = normalize(temp);
 
         //构建v
-        temp = cross(m_u, m_n);
+        temp = cross(m_n, m_u);
         m_v = normalize(temp);
 
         calculateViewMatrix();
@@ -49,7 +49,7 @@ namespace SoftRenderer
 
     void Camera::calculateViewMatrix()
 	{
-		m_viewMatrix = mat4x4(m_u.x, m_u.x, m_u.x, -dot(m_u, m_position), m_v.y, m_v.y, m_v.y, -dot(m_v, m_position), m_n.z, m_n.z, m_n.z, -dot(m_n, m_position), 0.f, 0.f, 0.f, 1.f);
+		m_viewMatrix = mat4x4(m_u.x, m_u.y, m_u.z, -dot(m_u, m_position), m_v.x, m_v.y, m_v.z, -dot(m_v, m_position), m_n.x, m_n.y, m_n.z, -dot(m_n, m_position), 0.f, 0.f, 0.f, 1.f);
 		m_viewPorjectMatrix = m_projectMatrix * m_viewMatrix;
 	}
 

@@ -67,43 +67,61 @@ void createBox(RenderBuffer *buffer, float width, float height, float depth)
 
     //前面
     fillVertex(box_pos[0], box_normals[0], box_uv[0], box_colors[0], vertex);
+    ++vertex;
     fillVertex(box_pos[1], box_normals[0], box_uv[1], box_colors[0], vertex);
+    ++vertex;
     fillVertex(box_pos[2], box_normals[0], box_uv[2], box_colors[0], vertex);
+    ++vertex;
     fillVertex(box_pos[3], box_normals[0], box_uv[3], box_colors[0], vertex);
     ++vertex;
 
     //后面
     fillVertex(box_pos[5], box_normals[1], box_uv[0], box_colors[1], vertex);
+    ++vertex;
     fillVertex(box_pos[4], box_normals[1], box_uv[1], box_colors[1], vertex);
+    ++vertex;
     fillVertex(box_pos[7], box_normals[1], box_uv[2], box_colors[1], vertex);
+    ++vertex;
     fillVertex(box_pos[6], box_normals[1], box_uv[3], box_colors[1], vertex);
     ++vertex;
 
     // 左边
     fillVertex(box_pos[4], box_normals[2], box_uv[0], box_colors[2], vertex);
+    ++vertex;
     fillVertex(box_pos[0], box_normals[2], box_uv[1], box_colors[2], vertex);
+    ++vertex;
     fillVertex(box_pos[6], box_normals[2], box_uv[2], box_colors[2], vertex);
+    ++vertex;
     fillVertex(box_pos[2], box_normals[2], box_uv[3], box_colors[2], vertex);
     ++vertex;
 
     // 右边
     fillVertex(box_pos[1], box_normals[3], box_uv[0], box_colors[3], vertex);
+    ++vertex;
     fillVertex(box_pos[5], box_normals[3], box_uv[1], box_colors[3], vertex);
+    ++vertex;
     fillVertex(box_pos[3], box_normals[3], box_uv[2], box_colors[3], vertex);
+    ++vertex;
     fillVertex(box_pos[7], box_normals[3], box_uv[3], box_colors[3], vertex);
     ++vertex;
 
     // 顶部
     fillVertex(box_pos[4], box_normals[4], box_uv[0], box_colors[4], vertex);
+    ++vertex;
     fillVertex(box_pos[5], box_normals[4], box_uv[1], box_colors[4], vertex);
+    ++vertex;
     fillVertex(box_pos[0], box_normals[4], box_uv[2], box_colors[4], vertex);
+    ++vertex;
     fillVertex(box_pos[1], box_normals[4], box_uv[3], box_colors[4], vertex);
     ++vertex;
 
     //底部
     fillVertex(box_pos[2], box_normals[5], box_uv[0], box_colors[5], vertex);
+    ++vertex;
     fillVertex(box_pos[3], box_normals[5], box_uv[1], box_colors[5], vertex);
+    ++vertex;
     fillVertex(box_pos[6], box_normals[5], box_uv[2], box_colors[5], vertex);
+    ++vertex;
     fillVertex(box_pos[7], box_normals[5], box_uv[3], box_colors[5], vertex);
     ++vertex;
 
@@ -135,7 +153,11 @@ public:
         v_out->normal = v_in->normal;
         v_out->color = v_in->color;
         v_out->texcoord = v_in->texcoord;
-        v_out->position = m_projMatrix * v_in->position;
+        v_out->position = v_in->position;
+
+        v_out->position = m_worldMatrix * v_out->position;
+        v_out->position = m_viewMatrix * v_out->position;
+        v_out->position = m_projMatrix * v_out->position;
     }
 
     virtual bool FragmentShader(RasterizerVertex *v_io)
@@ -184,15 +206,19 @@ public:
         //清空buffer
         m_render->Clear();
 
+        m_worldMatrix = rotate(M_PI * m_time * 0.3f , vec3(0.f, 1.f, 0.f));
+
         m_camera->SetPerspective(M_PI / 3, m_width / (float)m_height, 0.1f, 1000.f);
-        m_camera->Look(vec3(0, 3, -3), vec3(0, 0, 0), vec3(0, 1, 1));
+        m_camera->Look(vec3(0, 3, -3), vec3(0, 0, 0), vec3(0, 1, 0));
 
         //设置采样
         SamplerState state;
         state.m_filter = Bilinear;
         state.m_wrapMode = WRAP;
         m_shader.SetSampleState(state);
-        m_shader.SetProjMatrix(m_camera->m_viewPorjectMatrix);
+        m_shader.SetWorldMatrix(m_worldMatrix);
+        m_shader.SetViewMatrix(m_camera->m_viewMatrix);
+        m_shader.SetProjMatrix(m_camera->m_projectMatrix);
 
         //设置渲染状态
         SoftwareRenderState rState;
@@ -325,6 +351,13 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
     gApp = new TestApp();
     gApp->Init(hWnd, width, height);
+
+    /*
+    if (AllocConsole())
+    {
+        freopen("CONOUT$", "w", stdout);
+        printf("hello, world!");
+    }*/
 
     //循环
     MSG msg;

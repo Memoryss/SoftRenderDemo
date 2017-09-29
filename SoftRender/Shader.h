@@ -24,6 +24,16 @@ namespace SoftRenderer
             m_projMatrix = mat;
         }
 
+        void SetViewMatrix(const mat4x4 &mat)
+        {
+            m_viewMatrix = mat;
+        }
+
+        void SetWorldMatrix(const mat4x4 &mat)
+        {
+            m_worldMatrix = mat;
+        }
+
         void SetSampleState(const SamplerState &state)
         {
             m_state = state;
@@ -35,6 +45,8 @@ namespace SoftRenderer
         }
     protected:
         mat4x4 m_projMatrix;
+        mat4x4 m_viewMatrix;
+        mat4x4 m_worldMatrix;
         Texture *m_texture{ NULL };
         SamplerState m_state;
 

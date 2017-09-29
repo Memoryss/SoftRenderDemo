@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <algorithm>
+#include <iostream>
 #include "Texture.h"
 #include "Light.h"
 #include "RenderBuffer.h"
@@ -169,11 +170,11 @@ namespace SoftRenderer
 
                 //透视除法之后 点在cvv中 范围为-1 ~ 1 注意屏幕坐标和y坐标相反
                 a.position.x = (a.position.x + 1) / 2 * m_width;
-                a.position.y = (1 - a.position.y) / 2 * m_width;
+                a.position.y = (1 - a.position.y) / 2 * m_height;
                 b.position.x = (b.position.x + 1) / 2 * m_width;
-                b.position.y = (1 - b.position.y) / 2 * m_width;
+                b.position.y = (1 - b.position.y) / 2 * m_height;
                 c.position.x = (c.position.x + 1) / 2 * m_width;
-                c.position.y = (1 - c.position.y) / 2 * m_width;
+                c.position.y = (1 - c.position.y) / 2 * m_height;
 
                 //光栅化
                 rasterizeTriangle(&a, &b, &c);
@@ -195,6 +196,21 @@ namespace SoftRenderer
 
     void SoftwareRender::Present()
     {
+        /*
+        for (int i = 0; i < m_height; ++i)
+        {
+            for (int j = 0; j < m_width; ++j)
+            {
+                int index = i * m_height + j;
+                if (m_colorBuffer[index].r > 0)
+                {
+                    std::cout << index << ":" << m_colorBuffer[index].r << ":" << m_colorBuffer[index].g << ":" << m_colorBuffer[index].b << "." << std::endl;
+                }
+                
+            }
+        }
+        */
+
         m_context->Present(m_colorBuffer);
     }
 
@@ -486,7 +502,7 @@ namespace SoftRenderer
                 float ratio_cb = cb.y > 0 ? (float)(start_y - c.y) / cb.y : 1;
 
                 int x1 = (int)(a.x + ab.x * ratio_ab);
-                int x2 = (int)(a.x + ac.x * ratio_cb);
+                int x2 = (int)(c.x + cb.x * ratio_cb);
 
                 RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
                 RasterizerVertex::Lerp(v2, *pointC, *pointB, ratio_cb);
@@ -494,6 +510,7 @@ namespace SoftRenderer
                 if (x1 > x2)
                 {
                     std::swap(x1, x2);
+                    std::swap(v1, v2);
                 }
 
                 int start_x = max(x1, 0);
@@ -532,7 +549,7 @@ namespace SoftRenderer
 				float ratio_ac = ac.y > 0 ? (float)(start_y - a.y) / ac.y : 1;
 
 				int x1 = (int)(a.x + ratio_ab * ab.x);
-				int x2 = (int)(a.x + ratio_ab * ac.x);
+				int x2 = (int)(a.x + ratio_ac * ac.x);
 
 				RasterizerVertex::Lerp(v1, *pointA, *pointB, ratio_ab);
 				RasterizerVertex::Lerp(v2, *pointA, *pointC, ratio_ac);
@@ -545,7 +562,7 @@ namespace SoftRenderer
 
 				int start_x = max(0, x1);
 				int end_x = min(m_width, x2);
-				for (int x = x1; x < x2; ++x)
+				for (int x = start_x; x < end_x; ++x)
 				{
 					float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
 					RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
@@ -674,6 +691,8 @@ namespace SoftRenderer
         std::clamp(fragmentColor->r, 0.f, 1.f);
         std::clamp(fragmentColor->g, 0.f, 1.f);
         std::clamp(fragmentColor->b, 0.f, 1.f);
+
+        //std::cout << index << ":" << x << "：" << y << ":" << fragmentColor->r << ":" << fragmentColor->g << ":" << fragmentColor->b << "." << std::endl;
     }
 
     bool SoftwareRender::depthTest(float oldDepth, float newDepth)

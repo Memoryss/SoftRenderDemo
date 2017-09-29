@@ -614,7 +614,7 @@ namespace SoftRenderer
     {
         mat4x4 Perspective;
 
-        float coty = 1.0f / tan(fovy);
+        float coty = 1.0f / tan(fovy / 2);
 
         Perspective.m[0] = coty / aspect;
         Perspective.m[1] = 0.0f;
@@ -628,48 +628,44 @@ namespace SoftRenderer
 
         Perspective.m[8] = 0.0f;
         Perspective.m[9] = 0.0f;
-        Perspective.m[10] = (n + f) / (n - f);
-        Perspective.m[11] = 1.0f;
+        Perspective.m[10] = f / (f - n);
+        Perspective.m[11] = n * f / (n - f);
 
         Perspective.m[12] = 0.0f;
         Perspective.m[13] = 0.0f;
-        Perspective.m[14] = 2.0f * n * f / (n - f);
+        Perspective.m[14] = 1.f;
         Perspective.m[15] = 0.0f;
 
         return Perspective;
     }
 
-    mat4x4 rotate(float angle, const vec3 &u)
+    mat4x4 rotate(float rads, const vec3 &n)
     {
-        mat4x4 Rotate;
+        mat4x4 rot;
 
-        angle = angle / 180.0f * (float)M_PI;
+        float sine = sin(rads);
+        float cosine = cos(rads);
+        float _1_sub_cosine = 1 - cosine;
 
-        vec3 v = normalize(u);
+        float x_y = n.x * n.y;
+        float x_z = n.x * n.z;
+        float y_z = n.y * n.z;
 
-        float c = 1.0f - cos(angle), s = sin(angle);
+        rot.m[0] = n.x * n.x * _1_sub_cosine + cosine;
+        rot.m[4] = x_y * _1_sub_cosine + n.z * sine;
+        rot.m[8] = x_z * _1_sub_cosine - n.y * sine;
 
-        Rotate.m[0] = 1.0f + c * (v.x * v.x - 1.0f);
-        Rotate.m[1] = c * v.x * v.y + v.z * s;
-        Rotate.m[2] = c * v.x * v.z - v.y * s;
-        Rotate.m[3] = 0.0f;
+        rot.m[1] = x_y * _1_sub_cosine - n.z * sine;
+        rot.m[5] = n.y * n.y * _1_sub_cosine + cosine;
+        rot.m[9] = y_z * _1_sub_cosine + n.x * sine;
 
-        Rotate.m[4] = c * v.x * v.y - v.z * s;
-        Rotate.m[5] = 1.0f + c * (v.y * v.y - 1.0f);
-        Rotate.m[6] = c * v.y * v.z + v.x * s;
-        Rotate.m[7] = 0.0f;
+        rot.m[2] = x_z * _1_sub_cosine + n.y * sine;
+        rot.m[6] = y_z * _1_sub_cosine - n.x * sine;
+        rot.m[10] = n.z * n.z * _1_sub_cosine + cosine;
 
-        Rotate.m[8] = c * v.x * v.z + v.y * s;
-        Rotate.m[9] = c * v.y * v.z - v.x * s;
-        Rotate.m[10] = 1.0f + c * (v.z * v.z - 1.0f);
-        Rotate.m[11] = 0.0f;
-
-        Rotate.m[12] = 0.0f;
-        Rotate.m[13] = 0.0f;
-        Rotate.m[14] = 0.0f;
-        Rotate.m[15] = 1.0f;
-
-        return Rotate;
+        rot.m[15] = 1.f;
+        
+        return rot;
     }
 
     mat4x4 scale(float x, float y, float z)
