@@ -161,17 +161,17 @@ void createSphere(RenderBuffer *buffer, float radius, int rings, int segments)
     vec3 pos, nor;
 
     //纬线
-    for (int i = 0; i < rings; ++i)
+    for (int i = 0; i <= rings; ++i)
     {
         //纬线圈的半径
         r = radius * sin(i * anglePreRings);
         pos.y = radius * cos(i * anglePreRings);
 
         //经线
-        for (int j = 0; j < segments; ++j)
+        for (int j = 0; j <= segments; ++j)
         {
             pos.x = r * cos(j * anglePreSeg);
-            pos.y = r * sin(j * anglePreSeg);
+            pos.z = r * sin(j * anglePreSeg);
             nor = pos;
             normalize(nor);
 
@@ -233,6 +233,10 @@ public:
             m_texture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, tex_color);
             v_io->color *= tex_color;
         }
+        else
+        {
+            v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
+        }
 
         return true;
     }
@@ -285,7 +289,7 @@ public:
         m_shader.SetWorldMatrix(m_worldMatrix);
         m_shader.SetViewMatrix(m_camera->m_viewMatrix);
         m_shader.SetProjMatrix(m_camera->m_projectMatrix);
-        m_shader.SetTexture(m_texture);
+        //m_shader.SetTexture(m_texture);
 
         //设置渲染状态
         SoftwareRenderState rState;
