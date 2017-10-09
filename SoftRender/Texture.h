@@ -7,21 +7,17 @@ namespace SoftRenderer {
 
     enum TextureFormat
     {
-        TF_NONE = 0,
-        TF_BGR24,
-        TF_DEPTH16,
-    };
-
-	enum PixelSize
-	{
-		PS_24 = 24,
-		PS_32 = 32,
+        UNKNOWN = 0,
+        A8,
+        R8G8B8,
+        R8G8B8A8,
+        D16,
 	};
 
     enum TextureFilter
     {
         NEAREST = 0,//最近点
-        Bilinear, //双线性
+        LINEAR, //线性
     };
 
     enum TextureWrapMode
@@ -34,7 +30,7 @@ namespace SoftRenderer {
     struct SamplerState
     {
         TextureWrapMode m_wrapMode{ WRAP };
-        TextureFilter m_filter{ Bilinear };
+        TextureFilter m_filter{ LINEAR };
         vec4 m_boardColor{ 0.f, 0.f, 0.f, 1.f };
     };
 
@@ -62,20 +58,23 @@ namespace SoftRenderer {
         TextureFormat GetFormat() const;
 
     private:
-        void init();
+        void reset();
 
+        vec4 getColor(int u, int v);
+
+        /*
         //最近点过滤
         void getColorNearest(int s, int t, vec4 &color);
         //双线性过滤
-        void getColorBilinear(int s, int t, vec4 &color);
+        void getColorBilinear(float s, float t, vec4 &color);
+        */
 
     private:
-        void *m_data;   //数据
+        void *m_data{ NULL };   //数据
 
-        int m_width;    //宽度
-        int m_height;   //高度
-        TextureFormat m_format;   //格式
-        int m_pitch;    //偏移
+        int m_width{ 0 };    //宽度
+        int m_height{ 0 };   //高度
+        TextureFormat m_format{ UNKNOWN };   //格式
     };
 
 }

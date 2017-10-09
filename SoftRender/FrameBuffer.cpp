@@ -27,7 +27,7 @@ namespace SoftRenderer
 	void FrameBuffer::SetColorTexture(Texture *texture)
 	{
 		m_colorTexture = NULL;
-		if (NULL != texture && texture->GetFormat() == TF_BGR24 && texture->GetData() != NULL)
+		if (NULL != texture && texture->GetFormat() == R8G8B8A8 && texture->GetData() != NULL)
 		{
 			if (m_depthTexture == NULL 
 				|| (texture->GetWidth() == m_depthTexture->GetWidth()
@@ -41,7 +41,7 @@ namespace SoftRenderer
 	void FrameBuffer::SetDepthTexture(Texture *texture)
 	{
 		m_depthTexture = 0;
-		if (texture != NULL && texture->GetFormat() == TF_DEPTH16 && texture->GetData() != NULL)
+		if (texture != NULL && texture->GetFormat() == D16 && texture->GetData() != NULL)
 		{
 			if (m_colorTexture == NULL
 				|| (texture->GetHeight() == m_colorTexture->GetHeight()

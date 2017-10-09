@@ -22,14 +22,14 @@ namespace SoftRenderer {
         vec2i(const vec2i &u) : x(u.x), y(u.y) {}
         vec2i& operator = (const vec2i &u) { x = u.x; y = u.y; return *this; }
         vec2i operator - () { return vec2i(-x, -y); }
-        float* operator & () { return (float*)this; };
-        vec2i& operator += (float num) { x += num; y += num; return *this; }
+        int* operator & () { return (int*)this; };
+        vec2i& operator += (int num) { x += num; y += num; return *this; }
         vec2i& operator += (const vec2i &u) { x += u.x; y += u.y; return *this; }
-        vec2i& operator -= (float num) { x -= num; y -= num; return *this; }
+        vec2i& operator -= (int num) { x -= num; y -= num; return *this; }
         vec2i& operator -= (const vec2i &u) { x -= u.x; y -= u.y; return *this; }
-        vec2i& operator *= (float num) { x *= num; y *= num; return *this; }
+        vec2i& operator *= (int num) { x *= num; y *= num; return *this; }
         vec2i& operator *= (const vec2i &u) { x *= u.x; y *= u.y; return *this; }
-        vec2i& operator /= (float num) { x /= num; y /= num; return *this; }
+        vec2i& operator /= (int num) { x /= num; y /= num; return *this; }
         vec2i& operator /= (const vec2i &u) { x /= u.x; y /= u.y; return *this; }
         friend vec2i operator + (const vec2i &u, int num) { return vec2i(u.x + num, u.y + num); }
         friend vec2i operator + (int num, const vec2i &u) { return vec2i(num + u.x, num + u.y); }

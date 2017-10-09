@@ -145,6 +145,71 @@ void createBox(RenderBuffer *buffer, float width, float height, float depth)
     buffer->primType = PT_TriangleList;
 }
 
+void createSphere(RenderBuffer *buffer, float radius, int rings, int segments)
+{
+    int vertexCount = (rings + 1) * (segments + 1);
+    int indexCount = rings * segments * 6;
+
+    //顶点数据
+    buffer->vbuffer.resize(vertexCount);
+    Vertex *vertex = &buffer->vbuffer[0];
+    
+    float anglePreRings = M_PI / rings;
+    float anglePreSeg = M_PI * 2 / segments;
+
+    float r;
+    vec3 pos, nor;
+
+    //纬线
+    for (int i = 0; i < rings; ++i)
+    {
+        //纬线圈的半径
+        r = radius * sin(i * anglePreRings);
+        pos.y = radius * cos(i * anglePreRings);
+
+        //经线
+        for (int j = 0; j < segments; ++j)
+        {
+            pos.x = r * cos(j * anglePreSeg);
+            pos.y = r * sin(j * anglePreSeg);
+            nor = pos;
+            normalize(nor);
+
+            vertex->position = pos;
+            vertex->normal = nor;
+            vertex->color = (nor + vec3(1.f, 1.f, 1.f)) / 2;
+            ++vertex;
+        }
+    }
+
+    //索引数据
+    buffer->ibuffer.resize(indexCount);
+    short *indices = &buffer->ibuffer[0];
+
+    short row = 0, row_n = 0;
+
+    for (int i = 0; i < rings; ++i)
+    {
+        row_n = row + segments + 1;
+
+        for (int j = 0; j < segments; ++j)
+        {
+            *indices++ = row + j;
+            *indices++ = row + j + 1;
+            *indices++ = row_n + j;
+
+            *indices++ = row_n + j;
+            *indices++ = row + j + 1;
+            *indices++ = row_n + j + 1;
+        }
+
+        row += segments + 1;
+    }
+
+    buffer->primCount = indexCount / 3;
+    buffer->primType = PT_TriangleList;
+}
+
 class TestShader : public Shader
 {
 public:
@@ -194,8 +259,9 @@ public:
         m_camera = new Camera;
 
         ResourceManager::Instance()->AddPath("../Media");
-        createBox(m_renderBuffer, 1, 1, 1);
-        m_texture->LoadTexture("X.png");
+        //createBox(m_renderBuffer, 1, 1, 1);
+        createSphere(m_renderBuffer, 1, 30, 30);
+        //m_texture->LoadTexture("../Media/X1.png");
     }
 
     virtual void OnUpdate()
@@ -213,12 +279,13 @@ public:
 
         //设置采样
         SamplerState state;
-        state.m_filter = Bilinear;
+        state.m_filter = NEAREST;
         state.m_wrapMode = WRAP;
         m_shader.SetSampleState(state);
         m_shader.SetWorldMatrix(m_worldMatrix);
         m_shader.SetViewMatrix(m_camera->m_viewMatrix);
         m_shader.SetProjMatrix(m_camera->m_projectMatrix);
+        m_shader.SetTexture(m_texture);
 
         //设置渲染状态
         SoftwareRenderState rState;
@@ -253,10 +320,10 @@ public:
     }
 
 private:
-    SoftwareRender *m_render;
-    Texture *m_texture;
-    RenderBuffer *m_renderBuffer;
-    Camera *m_camera;
+    SoftwareRender *m_render{ NULL };
+    Texture *m_texture{ NULL };
+    RenderBuffer *m_renderBuffer{ NULL };
+    Camera *m_camera{ NULL };
     TestShader m_shader;
 
     mat4x4 m_worldMatrix;

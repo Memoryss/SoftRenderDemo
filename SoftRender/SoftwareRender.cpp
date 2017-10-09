@@ -129,7 +129,7 @@ namespace SoftRenderer
 
         //顶点处理
         m_rasterVertexBuffer.resize(buffer->vbuffer.size());
-        for (int i = 0; i < buffer->vbuffer.size(); ++i)
+        for (uint32_t i = 0; i < buffer->vbuffer.size(); ++i)
         {
             vertexShader(&m_rasterVertexBuffer[i], &buffer->vbuffer[i]);
         }
@@ -238,8 +238,8 @@ namespace SoftRenderer
 
 		RasterizerVertex v;
 
-		vec2i a(pointA->position.x, pointA->position.y);
-		vec2i b(pointB->position.y, pointB->position.y);	
+		vec2i a((int)pointA->position.x, (int)pointA->position.y);
+		vec2i b((int)pointB->position.y, (int)pointB->position.y);
 		vec2i ab = b - a;
 
 		//斜率小于0.5
@@ -432,9 +432,9 @@ namespace SoftRenderer
             std::swap(pointB, pointC);
         }
 
-        vec2i a(pointA->position.x, pointA->position.y);
-        vec2i b(pointB->position.x, pointB->position.y);
-        vec2i c(pointC->position.x, pointC->position.y);
+        vec2i a((int)pointA->position.x, (int)pointA->position.y);
+        vec2i b((int)pointB->position.x, (int)pointB->position.y);
+        vec2i c((int)pointC->position.x, (int)pointC->position.y);
         vec2i ab = b - a;
         vec2i ac = c - a;
 
@@ -598,7 +598,7 @@ namespace SoftRenderer
 				int end_x = min(x2, m_height);
 				for (int x = start_x; x < end_x; ++x)
 				{
-					int ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
+					float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
 
 					RasterizerVertex::Lerp(v, v1, v2, ratio_x1x2);
 					if (fragmentShader(&v))
@@ -691,8 +691,6 @@ namespace SoftRenderer
         std::clamp(fragmentColor->r, 0.f, 1.f);
         std::clamp(fragmentColor->g, 0.f, 1.f);
         std::clamp(fragmentColor->b, 0.f, 1.f);
-
-        //std::cout << index << ":" << x << "：" << y << ":" << fragmentColor->r << ":" << fragmentColor->g << ":" << fragmentColor->b << "." << std::endl;
     }
 
     bool SoftwareRender::depthTest(float oldDepth, float newDepth)

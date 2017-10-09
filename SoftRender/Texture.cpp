@@ -7,12 +7,12 @@
 
 namespace SoftRenderer {
 
-	const int CD_255 = 1.0f / 255;
-	const int CD_65535 = 1.0f / 65535;
+	const float CD_255 = 1.0f / 255;
+	const float CD_65535 = 1.0f / 65535;
 
     Texture::Texture()
     {
-        init();
+        
     }
 
     Texture::~Texture()
@@ -62,12 +62,13 @@ namespace SoftRenderer {
 			return false;
 		}
 
-		if (PS_24 != bpp || PS_32 != bpp)
-		{
-			SLOG(errorText + "bpp is not 24 or 32");
-			FreeImage_Unload(dib);
-			return false;
-		}
+        bpp /= 8;
+        if (bpp != 3 && bpp != 4)
+        {
+            SLOG(errorText + "bpp is not 24 or 32");
+            FreeImage_Unload(dib);
+            return false;
+        }
 
 		BYTE *bits = FreeImage_GetBits(dib);
 		if (NULL == bits)
@@ -77,18 +78,18 @@ namespace SoftRenderer {
 			return false;
 		}
 
-		CreateTexture(width, height, TF_BGR24);
+        TextureFormat format = bpp == 3 ? R8G8B8 : R8G8B8A8;
+		CreateTexture(width, height, format);
 		BYTE *pixel = (BYTE*)this->m_data;
 
-		bpp /= 8;
 		//填充数据
 		for (int y = 0; y < height; ++y)
 		{
 			for (int x = 0; x < height; ++x)
 			{
-				for (int i = 0; i < 3; ++i)
+				for (int i = 0; i < bpp; ++i)
 				{
-					pixel[(width * y + x) * 3 + i] = bits[pitch * y + bpp * x + i];
+					pixel[(width * y + x) * bpp + i] = bits[pitch * y + bpp * x + i];
 				}
 			}
 		}
@@ -97,6 +98,7 @@ namespace SoftRenderer {
         return true;
     }
 
+    /*
     void Texture::getColorNearest(int x, int y, vec4 &color)
     {
 		if (NULL != m_data)
@@ -132,14 +134,25 @@ namespace SoftRenderer {
 		}
     }
 
-    void Texture::getColorBilinear(int x, int y, vec4 &color)
+    void Texture::getColorBilinear(float s, float t, vec4 &color)
     {
 		if (NULL != m_data)
 		{
+            s -= (int)s;
+            t -= (int)t;
+
+            if (s < 0.0f) s += 1.0f;
+            if (t < 0.0f) t += 1.0f;
+
+            float fx = s * m_width - 0.5f, fy = t * m_height - 0.5f;
+
+            if (fx < 0.0f) fx += m_width;
+            if (fy < 0.0f) fy += m_height;
+
 			//取出像素上的四个点
-			int x1 = x;
+			int x1 = fx;
 			int x2 = (x1 + 1) % m_width; //超过则移到开始位置
-			int y1 = y;
+			int y1 = fy;
 			int y2 = (y1 + 1) % m_height;
 
 			switch (m_format)
@@ -160,9 +173,9 @@ namespace SoftRenderer {
                 BYTE *pixel4 = line2 + deltaX2;
 
                 //每个像素的权重
-                float u1 = x - x1;
+                float u1 = fx - x1;
                 float u2 = 1.f - u1;
-                float v1 = y - y1;
+                float v1 = fy - y1;
                 float v2 = 1.f - v1;
 
                 //为了减少计算量  在这里进行颜色映射
@@ -196,9 +209,9 @@ namespace SoftRenderer {
                 BYTE *pixel4 = line2 + deltaX2;
 
                 //每个像素的权重
-                float u1 = x - x1;
+                float u1 = fx - x1;
                 float u2 = 1.f - u1;
-                float v1 = y - y1;
+                float v1 = fy - y1;
                 float v2 = 1.f - v1;
 
                 //为了减少计算量  在这里进行颜色映射
@@ -226,6 +239,7 @@ namespace SoftRenderer {
             color.a = 1.f;
 		}
     }
+    */
 
     float Texture::GetShadowNearest(vec4 &texcoord)
     {
@@ -243,20 +257,11 @@ namespace SoftRenderer {
     {
         if (NULL != m_data)
         {
-            switch (m_format)
-            {
-            case TextureFormat::TF_DEPTH16:
-                delete[](unsigned char *)m_data;
-                break;
-            case TextureFormat::TF_BGR24:
-                delete[](unsigned short*)m_data;
-                break;
-            default:
-                break;
-            }
+            BYTE *byte = (BYTE *)m_data;
+            delete byte;
         }
 
-        init();
+        reset();
     }
 
     int Texture::GetWidth() const
@@ -279,33 +284,72 @@ namespace SoftRenderer {
         return m_format;
     }
 
-    void Texture::init()
+    void Texture::reset()
     {
         m_data = NULL;
 
         m_width = 0;
         m_height = 0;
-        m_format = TextureFormat::TF_NONE;
-        m_pitch = 0;
+        m_format = UNKNOWN;
+    }
+
+    vec4 Texture::getColor(int u, int v)
+    {
+        assert(u >= 0 && u < m_width && v >= 0 && u < m_height);
+
+        vec4 color(0.f, 0.f, 0.f, 1.f);
+        int index = v * m_height + u;
+        const BYTE *data = (const BYTE *)m_data;
+
+        switch (m_format)
+        {
+        case SoftRenderer::UNKNOWN:
+            break;
+        case SoftRenderer::A8:
+            color.r = 1.f;
+            color.g = 1.f;
+            color.b = 1.f;
+            color.a = data[index] / 255.f;
+            break;
+        case SoftRenderer::R8G8B8:
+            color.b = data[index * 3] / 255.f;
+            color.g = data[index * 3 + 1] / 255.f;
+            color.r = data[index * 3 + 2] / 255.f;
+            color.a = 1.f;
+            break;
+        case SoftRenderer::R8G8B8A8:
+            color.b = data[index * 4] / 255.f;
+            color.g = data[index * 4 + 1] / 255.f;
+            color.r = data[index * 4 + 2] / 255.f;
+            color.a = data[index * 4 + 3] / 255.f;
+            break;
+        default:
+            break;
+        }
+
+        return color;
     }
 
     void Texture::CreateTexture(int width, int height, TextureFormat format)
 	{
 		//先清除之前的纹理
-		Clear();
+		reset();
 
-		if (width > 0 && height > 0 && (format == TF_BGR24 || format == TF_DEPTH16))
+		if (width > 0 && height > 0)
 		{
 			switch (format)
 			{
-			case TF_BGR24:
-				m_data = new BYTE[width * height * 3];
-				m_pitch = width * 3;
+			case A8:
+				m_data = new BYTE[width * height];
 				break;
-			case TF_DEPTH16:
+			case D16:
 				m_data = new BYTE[width * height * 2];
-				m_pitch = width * 2;
 				break;
+            case R8G8B8A8:
+                m_data = new BYTE[width * height * 4];
+                break;
+            case R8G8B8:
+                m_data = new BYTE[width * height * 3];
 			default:
 				break;
 			}
@@ -375,16 +419,35 @@ namespace SoftRenderer {
             break;
         }
 
-        int u = x * (m_width - 1);
-        int v = x * (m_height - 1);
+        float fu = x * (m_width - 1);
+        float fv = y * (m_height - 1);
+        int u = (int)fu;
+        int v = (int)fv;
 
         switch (state.m_filter)
         {
         case NEAREST:
-            getColorNearest(u, v, color);
+            color = getColor(u, v);
             break;
-        case Bilinear:
-            getColorBilinear(u, v, color);
+        case LINEAR:
+        {
+            int u1 = u + 1 > m_width ? u + 1 : u;
+            int v1 = v + 1 > m_height ? v + 1 : v;
+            vec4 color1, color2, color3, color4;
+            color1 = getColor(u, v);
+            color2 = getColor(u1, v);
+            color3 = getColor(u, v1);
+            color4 = getColor(u1, v1);
+
+            float du = fu - u;
+            float dv = fv - v;
+
+            vec4 color5 = color1 + (color2 - color1) * du;
+            vec4 color6 = color3 + (color4 - color3) * du;
+
+            color = color5 + (color6 - color5) * dv;
+        }
+            break;
         default:
             color = vec4(0.f, 0.f, 0.f, 1.f);
             break;
