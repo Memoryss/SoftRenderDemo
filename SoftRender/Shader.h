@@ -3,6 +3,8 @@
 
 #include "type.h"
 #include "SoftwareRenderState.h"
+#include "Light.h"
+#include "Material.h"
 
 namespace SoftRenderer
 {
@@ -43,13 +45,31 @@ namespace SoftRenderer
         {
             m_texture = texture;
         }
+
+        void SetLight(Light *light)
+        {
+            m_light = light;
+        }
+
+        void SetMaterial(Material *material)
+        {
+            m_material = material;
+        }
+
+        void SetCameraPosition(const vec3 &camepos)
+        {
+            m_camPos = camepos;
+        }
+
     protected:
+        vec3 m_camPos{ 0.f, 0.f, 0.f };
         mat4x4 m_projMatrix;
         mat4x4 m_viewMatrix;
         mat4x4 m_worldMatrix;
         Texture *m_texture{ NULL };
         SamplerState m_state;
-
+        Light *m_light{ NULL };
+        Material *m_material{ NULL };
     };
 }
 

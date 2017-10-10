@@ -6,6 +6,10 @@
 #include "RenderBuffer.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "Light.h"
+
+#include <algorithm>
+#include <iostream>
 
 #pragma comment(lib, "FreeImage.lib")
 
@@ -173,7 +177,7 @@ void createSphere(RenderBuffer *buffer, float radius, int rings, int segments)
             pos.x = r * cos(j * anglePreSeg);
             pos.z = r * sin(j * anglePreSeg);
             nor = pos;
-            normalize(nor);
+            nor = normalize(nor);
 
             vertex->position = pos;
             vertex->normal = nor;
@@ -219,7 +223,9 @@ public:
         v_out->color = v_in->color;
         v_out->texcoord = v_in->texcoord;
         v_out->position = v_in->position;
+        v_out->originPostion = v_in->position;
 
+        //TODO 优化合并矩阵
         v_out->position = m_worldMatrix * v_out->position;
         v_out->position = m_viewMatrix * v_out->position;
         v_out->position = m_projMatrix * v_out->position;
@@ -227,7 +233,74 @@ public:
 
     virtual bool FragmentShader(RasterizerVertex *v_io)
     {
-        if (m_texture != NULL)
+        //blinn-phong模型
+        if (NULL != m_light)
+        {
+            vec3 N, L, V, H, S;
+            float ka, kd, ks; //ka 衰减系数  Kd 漫反射属性 ks 镜面反射属性（半角）
+            float len = 0.f, kspot = 0.f;
+            float cosInner = 0.f, cosOuter = 0.f;
+            vec4 temp = m_worldMatrix * v_io->originPostion;
+            vec3 worldPos = vec3(temp.x, temp.y, temp.z);
+            
+            //!注意 法线变化到世界坐标系下 w为0！！！
+            temp = m_worldMatrix * vec4(v_io->normal, 0.f);
+            N = normalize(vec3(temp.x, temp.y, temp.z));
+            V = m_camPos - worldPos;
+            V = normalize(V);
+            
+            vec3 emissive = m_material->emissive;
+            vec3 ambient = m_material->ambient;
+            vec3 diffuse = m_material->diffuse * m_light->m_diffuse;
+            vec3 specular = m_material->specular * m_light->m_specular;
+            int x, y;
+            switch (m_light->m_type)
+            {
+            case DIRECTION:
+                L = -m_light->m_direction;
+                L = normalize(L);
+                x = v_io->position.x;
+                y = v_io->position.y;
+                H = V + L;
+                H = normalize(H);
+                kd = max(dot(N, L), 0.f);  //漫反射 法线和光线点乘
+                ks = max(dot(N, H), 0.f);  //镜面反射 半角
+                ka = 1;
+                ks = pow(ks, m_material->specularPower);
+                v_io->color = emissive + (ambient + (diffuse * kd + specular * ks) * ka);
+                    
+                break;
+            case LightType::POINT:
+                L = m_light->m_position - worldPos;
+                len = length(L);
+                kd = max(dot(N, L), 0.f);  //漫反射 法线和光线点乘
+                ks = max(dot(N, H), 0.f);  //镜面反射 半角
+                ka = (len - m_light->m_attenStart) / (m_light->m_attenEnd - m_light->m_attenStart);
+                ka = pow(1 - std::clamp(ka, 0.f, 1.f), m_light->m_attenFallOff);
+                v_io->color = emissive + (ambient + (diffuse * kd + specular * ks) * ka);
+                break;
+            case SPOT:
+                S = m_light->m_position - worldPos;
+                L = -m_light->m_direction;
+                len = length(S);
+                kd = max(dot(N, L), 0.f);  //漫反射 法线和光线点乘
+                ks = max(dot(N, H), 0.f);  //镜面反射 半角
+                ka = (len - m_light->m_attenStart) / (m_light->m_attenEnd - m_light->m_attenStart);
+                ka = pow(1 - std::clamp(ka, 0.f, 1.f), m_light->m_attenFallOff);
+
+                cosInner = cos(m_light->m_spotInner * M_DEGTORAD);
+                cosOuter = cos(m_light->m_spotOuter * M_DEGTORAD);
+                kspot = (dot(S, L) - cosOuter) / (cosInner - cosOuter);
+                kspot = pow(std::clamp(ks, 0.f, 1.f), m_light->m_spotFallOff);
+                ka *= kspot;
+                v_io->color = emissive + (ambient + (diffuse * kd + specular * ks) * ka);
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (m_texture != NULL && m_texture->GetData() != NULL)
         {
             vec4 tex_color;
             m_texture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, tex_color);
@@ -235,7 +308,7 @@ public:
         }
         else
         {
-            v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
+            //v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
         }
 
         return true;
@@ -263,9 +336,9 @@ public:
         m_camera = new Camera;
 
         ResourceManager::Instance()->AddPath("../Media");
-        //createBox(m_renderBuffer, 1, 1, 1);
-        createSphere(m_renderBuffer, 1, 30, 30);
-        //m_texture->LoadTexture("../Media/X1.png");
+        createBox(m_renderBuffer, 1, 1, 1);
+        //createSphere(m_renderBuffer, 1, 30, 30);
+        m_texture->LoadTexture("../Media/X1.png");
     }
 
     virtual void OnUpdate()
@@ -276,10 +349,10 @@ public:
         //清空buffer
         m_render->Clear();
 
-        m_worldMatrix = rotate(M_PI * m_time * 0.3f , vec3(0.f, 1.f, 0.f));
+        m_worldMatrix = rotate(M_PI * m_time  * 0.3f , vec3(0.f, 1.f, 0.f));
 
         m_camera->SetPerspective(M_PI / 3, m_width / (float)m_height, 0.1f, 1000.f);
-        m_camera->Look(vec3(0, 3, -3), vec3(0, 0, 0), vec3(0, 1, 0));
+        m_camera->Look(vec3(0, 3, -5), vec3(0, 0, 0), vec3(0, 1, 0));
 
         //设置采样
         SamplerState state;
@@ -289,7 +362,27 @@ public:
         m_shader.SetWorldMatrix(m_worldMatrix);
         m_shader.SetViewMatrix(m_camera->m_viewMatrix);
         m_shader.SetProjMatrix(m_camera->m_projectMatrix);
-        //m_shader.SetTexture(m_texture);
+        m_shader.SetTexture(m_texture);
+
+        //TODO 灯光 材质变量挪位置
+        //设置灯
+        Light light;
+        light.m_type = DIRECTION;
+        light.m_direction = vec3(-1, -1, 1);
+        light.m_diffuse = vec3(1.f, 1.f, 1.f);
+        light.m_specular = vec3(1.f, 1.f, 1.f);
+        light.m_direction = normalize(light.m_direction);
+        m_shader.SetLight(&light);
+  
+        //材质
+        Material material;
+        material.ambient = vec3(1.f, 0.f, 0.f) * 0.3f;
+        material.diffuse = vec3(1.f, 0.f, 0.f);
+        material.specular = vec3(1.f, 1.f, 1.f) * 0.5f;
+        material.specularPower = 20;
+        m_shader.SetMaterial(&material);
+
+        m_shader.SetCameraPosition(m_camera->m_position);
 
         //设置渲染状态
         SoftwareRenderState rState;
@@ -423,12 +516,13 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     gApp = new TestApp();
     gApp->Init(hWnd, width, height);
 
-    /*
-    if (AllocConsole())
-    {
-        freopen("CONOUT$", "w", stdout);
-        printf("hello, world!");
-    }*/
+    
+//     if (AllocConsole())
+//     {
+//         freopen("CONOUT$", "w", stdout);
+//         printf("hello, world!");
+//     }
+    
 
     //循环
     MSG msg;

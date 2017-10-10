@@ -688,9 +688,9 @@ namespace SoftRenderer
             break;
         }
 
-        std::clamp(fragmentColor->r, 0.f, 1.f);
-        std::clamp(fragmentColor->g, 0.f, 1.f);
-        std::clamp(fragmentColor->b, 0.f, 1.f);
+        fragmentColor->r = std::clamp(fragmentColor->r, 0.f, 1.f);
+        fragmentColor->g = std::clamp(fragmentColor->g, 0.f, 1.f);
+        fragmentColor->b = std::clamp(fragmentColor->b, 0.f, 1.f);
     }
 
     bool SoftwareRender::depthTest(float oldDepth, float newDepth)

@@ -16,6 +16,7 @@ namespace SoftRenderer {
     struct RasterizerVertex
     {
         vec4 position;
+        vec4 originPostion; //  记录开始位置 为了计算光照模型
         vec3 normal;
         vec4 color;
         vec2 texcoord;
@@ -26,6 +27,7 @@ namespace SoftRenderer {
             v.normal = a.normal + (b.normal - a.normal) * ratio;
             v.color = a.color + (b.color - a.color) * ratio;
             v.texcoord = a.texcoord + (b.texcoord - a.texcoord) * ratio;
+            v.originPostion = a.originPostion + (b.originPostion - a.originPostion) * ratio;
         }
     };
 
