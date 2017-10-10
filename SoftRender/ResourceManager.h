@@ -14,9 +14,11 @@ public:
 
     void AddPath(const std::string &path);
 
+    std::string GetFilePath(const std::string &filename);
+
     std::shared_ptr<IFile> OpenFile(const std::string &filename);
 
-    bool IsExit(const std::string &filename);
+    bool IsExist(const std::string &filename);
 
 private:
     ResourceManager() {};

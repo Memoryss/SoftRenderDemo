@@ -27,7 +27,7 @@ namespace SoftRenderer
         Object();
         ~Object();
 
-        bool Load(const char *dir, const char *filePath);
+        bool Load(const char *fileName);
 
         void Translation(const vec3 &deltaPos);
 
@@ -38,16 +38,15 @@ namespace SoftRenderer
         void Clear();
 
     private:
-        void init();
 
         bool loadResource(const char *dir, const char *fileName, char **source, long length);
 
-        bool loadMaterial(const char *dir, const char *mtlFileName);
+        bool loadMaterial(const char *mtlFileName);
 
     public:
         Texture m_texture;
-        Vertex *m_vertices;
-        int m_verticeCount;
+        Vertex *m_vertices{ NULL };
+        int m_verticeCount{ 0 };
     };
 }
 

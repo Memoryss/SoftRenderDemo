@@ -19,6 +19,20 @@ void ResourceManager::AddPath(const std::string &path)
     m_resourcePaths.push_back(path);
 }
 
+std::string ResourceManager::GetFilePath(const std::string &filename)
+{
+    for each (auto dir in m_resourcePaths)
+    {
+        std::string path = dir + '/' + filename;
+        if (hasFile(path))
+        {
+            return path;
+        }
+    }
+
+    return std::string();
+}
+
 std::shared_ptr<IFile> ResourceManager::OpenFile(const std::string &filename)
 {
     std::shared_ptr<IFile> ptr;
@@ -35,18 +49,11 @@ std::shared_ptr<IFile> ResourceManager::OpenFile(const std::string &filename)
     return ptr;
 }
 
-bool ResourceManager::IsExit(const std::string &filename)
+bool ResourceManager::IsExist(const std::string &filename)
 {
-    for each (auto dir in m_resourcePaths)
-    {
-        std::string path = dir + '/' + filename;
-        if (hasFile(path))
-        {
-            return true;
-        }
-    }
+    std::string path = GetFilePath(filename);
 
-    return false;
+    return !path.empty();
 }
 
 bool ResourceManager::hasFile(const std::string &file)

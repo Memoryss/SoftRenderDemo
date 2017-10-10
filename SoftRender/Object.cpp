@@ -2,13 +2,14 @@
 
 #include <cstdio>
 #include "log.h"
+#include "ResourceManager.h"
 
 namespace SoftRenderer
 {
 
     Object::Object()
     {
-        init();
+
     }
 
     Object::~Object()
@@ -16,17 +17,21 @@ namespace SoftRenderer
 
     }
 
-    bool Object::Load(const char *dir, const char *fileName)
+    bool Object::Load(const char *fileName)
     {
         std::string errorText("Error loading file %s!\r\n");
-		char *obj_source;
-		long obj_length;
 
-		Clear();
-		if (!loadResource(dir, fileName, &obj_source, obj_length))
-		{
-			return false;
-		}
+        Clear();
+
+        std::shared_ptr<IFile> file = ResourceManager::Instance()->OpenFile(fileName);
+        if (!file)
+        {
+            SLOG(errorText + fileName + " load error");
+            return false;
+        }
+
+		char *obj_source = (char *)file->GetData();
+		long obj_length = file->Size();
 
 		char *line = obj_source;
 		char *end = obj_source + obj_length;
@@ -53,7 +58,7 @@ namespace SoftRenderer
                 {
                     ++mtlFileName;
                 }
-                if (!loadMaterial(dir, mtlFileName))
+                if (!loadMaterial(mtlFileName))
                 {
                     delete[] obj_source;
                     return false;
@@ -273,11 +278,6 @@ namespace SoftRenderer
             delete[] m_vertices;
         }
 
-        init();
-    }
-
-    void Object::init()
-    {
         m_vertices = NULL;
         m_verticeCount = 0;
     }
@@ -313,15 +313,19 @@ namespace SoftRenderer
 		}
     }
 
-    bool Object::loadMaterial(const char *dir, const char *mtlFilePath)
+    bool Object::loadMaterial(const char *mtlFileName)
     {
         char *mtl_source;
         long mtl_length;
 
-        if (!loadResource(dir, mtlFilePath, &mtl_source, mtl_length))
+        std::shared_ptr<IFile> file = ResourceManager::Instance()->OpenFile(mtlFileName);
+        if (!file)
         {
             return false;
         }
+
+        mtl_source = (char *)file->GetData();
+        mtl_length = file->Size();
 
         bool success = true;
 
@@ -343,9 +347,7 @@ namespace SoftRenderer
                     ++textureFileName;
                 }
 
-                std::string texturePath = dir;
-                texturePath += textureFileName;
-                success = m_texture.LoadTexture(texturePath.c_str());
+                success = m_texture.LoadTexture(textureFileName);
             }
 
             while (line < end && *line != 0)

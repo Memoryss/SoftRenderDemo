@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "FreeImage.h"
 #include "log.h"
+#include "ResourceManager.h"
 
 namespace SoftRenderer {
 
@@ -26,10 +27,17 @@ namespace SoftRenderer {
 		errorText.append(textureFileName);
 		errorText.append("->");
 
-        FREE_IMAGE_FORMAT image_format = FreeImage_GetFileType(textureFileName);
+        std::string path = ResourceManager::Instance()->GetFilePath(textureFileName);
+        if (path.empty())
+        {
+            SLOG(errorText + " not exist");
+            return false;
+        }
+
+        FREE_IMAGE_FORMAT image_format = FreeImage_GetFileType(path.c_str());
         if (FIF_UNKNOWN == image_format)
         {
-            image_format = FreeImage_GetFIFFromFilename(textureFileName);
+            image_format = FreeImage_GetFIFFromFilename(path.c_str());
         }
 
         if (FIF_UNKNOWN == image_format)
