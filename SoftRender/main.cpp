@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Light.h"
+#include "Object.h"
 
 #include <algorithm>
 #include <iostream>
@@ -234,7 +235,7 @@ public:
     virtual bool FragmentShader(RasterizerVertex *v_io)
     {
         //blinn-phong模型
-        if (NULL != m_light)
+        if (NULL != m_light && NULL != m_material)
         {
             vec3 N, L, V, H, S;
             float ka, kd, ks; //ka 衰减系数  Kd 漫反射属性 ks 镜面反射属性（半角）
@@ -266,7 +267,7 @@ public:
                 kd = max(dot(N, L), 0.f);  //漫反射 法线和光线点乘
                 ks = max(dot(N, H), 0.f);  //镜面反射 半角
                 ka = 1;
-                ks = pow(ks, m_material->specularPower);
+                ks = pow(ks, 20);
                 v_io->color = emissive + (ambient + (diffuse * kd + specular * ks) * ka);
                     
                 break;
@@ -300,6 +301,11 @@ public:
             }
         }
 
+        if (m_material == NULL)
+        {
+            v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
+        }
+
         if (m_texture != NULL && m_texture->GetData() != NULL)
         {
             vec4 tex_color;
@@ -308,7 +314,7 @@ public:
         }
         else
         {
-            //v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
+            v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
         }
 
         return true;
@@ -336,9 +342,16 @@ public:
         m_camera = new Camera;
 
         ResourceManager::Instance()->AddPath("../Media");
-        createBox(m_renderBuffer, 1, 1, 1);
+        ResourceManager::Instance()->AddPath(".");
+        //createBox(m_renderBuffer, 1, 1, 1);
         //createSphere(m_renderBuffer, 1, 30, 30);
-        m_texture->LoadTexture("../Media/X1.png");
+        //m_texture->LoadTexture("X1.png");
+        m_object = new Object;
+        if (!m_object->Load("dodecahedron.obj"))
+        {
+            delete m_object;
+            m_object = NULL;
+        }
     }
 
     virtual void OnUpdate()
@@ -349,7 +362,7 @@ public:
         //清空buffer
         m_render->Clear();
 
-        m_worldMatrix = rotate(M_PI * m_time  * 0.3f , vec3(0.f, 1.f, 0.f));
+        m_worldMatrix = rotate(M_PI  * 0.3f , vec3(0.f, 1.f, 0.f));
 
         m_camera->SetPerspective(M_PI / 3, m_width / (float)m_height, 0.1f, 1000.f);
         m_camera->Look(vec3(0, 3, -5), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -358,11 +371,12 @@ public:
         SamplerState state;
         state.m_filter = NEAREST;
         state.m_wrapMode = WRAP;
-        m_shader.SetSampleState(state);
-        m_shader.SetWorldMatrix(m_worldMatrix);
-        m_shader.SetViewMatrix(m_camera->m_viewMatrix);
-        m_shader.SetProjMatrix(m_camera->m_projectMatrix);
-        m_shader.SetTexture(m_texture);
+        m_render->SetSampleState(state);
+        m_render->SetWorldMatrix(m_worldMatrix);
+        m_render->SetViewMatrix(m_camera->m_viewMatrix);
+        m_render->SetProjMatrix(m_camera->m_projectMatrix);
+        m_render->SetTexture(m_texture);
+        m_render->SetCamera(m_camera);
 
         //TODO 灯光 材质变量挪位置
         //设置灯
@@ -372,17 +386,17 @@ public:
         light.m_diffuse = vec3(1.f, 1.f, 1.f);
         light.m_specular = vec3(1.f, 1.f, 1.f);
         light.m_direction = normalize(light.m_direction);
-        m_shader.SetLight(&light);
+        m_render->SetLight(&light);
   
         //材质
+        /*
         Material material;
         material.ambient = vec3(1.f, 0.f, 0.f) * 0.3f;
         material.diffuse = vec3(1.f, 0.f, 0.f);
         material.specular = vec3(1.f, 1.f, 1.f) * 0.5f;
         material.specularPower = 20;
-        m_shader.SetMaterial(&material);
-
-        m_shader.SetCameraPosition(m_camera->m_position);
+        m_render->SetMaterial(&material);
+        */
 
         //设置渲染状态
         SoftwareRenderState rState;
@@ -394,7 +408,11 @@ public:
 
         m_render->SetShader(&m_shader);
 
-        m_render->Render(m_renderBuffer);
+        //m_render->Render(m_renderBuffer);
+        if (m_object)
+        {
+            m_render->Render(m_object);
+        }
 
         m_render->End();
 
@@ -426,6 +444,8 @@ private:
     mat4x4 m_worldMatrix;
     mat4x4 m_viewMatrix;
     mat4x4 m_projMatrix;
+
+    Object *m_object{ NULL };
 };
 
 App *gApp = NULL;

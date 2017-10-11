@@ -6,13 +6,7 @@
 
 namespace SoftRenderer
 {
-    struct Vertex
-    {
-        vec3 m_position;
-        vec3 m_color;
-        vec2 m_texcoord;
-        vec3 m_normal;
-    };
+    struct Vertex;
 
     struct Triangle
     {
@@ -27,6 +21,7 @@ namespace SoftRenderer
         Object();
         ~Object();
 
+        //TODO 使用顶点索引
         bool Load(const char *fileName);
 
         void Translation(const vec3 &deltaPos);
@@ -44,7 +39,7 @@ namespace SoftRenderer
         bool loadMaterial(const char *mtlFileName);
 
     public:
-        Texture m_texture;
+        Texture m_texture; //TODO 暂时只有map_ka 纹理
         Vertex *m_vertices{ NULL };
         int m_verticeCount{ 0 };
     };

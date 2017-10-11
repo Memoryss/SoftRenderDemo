@@ -97,7 +97,7 @@ void * DiskFile::GetData()
     {
         int size = Size();
         m_data = new BYTE[size + 1];
-
+        m_data[size] = 0;
     }
 
     return m_data;

@@ -7,15 +7,17 @@
 #include "SoftwareRenderContext.h"
 #include "SoftwareRenderState.h"
 #include "Vertex.h"
+#include "Texture.h"
 
 namespace SoftRenderer
 {
     class FrameBuffer;
-    class Texture;
     struct RenderBuffer;
     class Light;
     class Camera;
     class Shader;
+    class Object;
+    struct Material;
 
     class SoftwareRender
     {
@@ -39,11 +41,17 @@ namespace SoftRenderer
 
         void SetTexture(Texture *texture);
 
+        void SetMaterial(Material *material);
+
         void SetShader(Shader *shader);
 
         void SetRenderState(const SoftwareRenderState &state);
 
+        void SetSampleState(const SamplerState &state);
+
         void Render(RenderBuffer *buffer);
+
+        void Render(Object *object);
 
         void Begin();
 
@@ -83,9 +91,12 @@ namespace SoftRenderer
         Texture *m_texture{ NULL };
         Camera *m_camera{ NULL };
         Light *m_light{ NULL };
+        Material *m_material{ NULL };
 
         SoftwareRenderState m_renderState;
         Shader *m_shader{ NULL };
+
+        SamplerState m_samplerState;
 
         std::vector<RasterizerVertex> m_rasterVertexBuffer;
     };

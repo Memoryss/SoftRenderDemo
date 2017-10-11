@@ -3,6 +3,7 @@
 #include <cstdio>
 #include "log.h"
 #include "ResourceManager.h"
+#include "Vertex.h"
 
 namespace SoftRenderer
 {
@@ -23,15 +24,31 @@ namespace SoftRenderer
 
         Clear();
 
+        //TODO 暂时为文本文件
         std::shared_ptr<IFile> file = ResourceManager::Instance()->OpenFile(fileName);
+        
         if (!file)
         {
             SLOG(errorText + fileName + " load error");
             return false;
         }
 
-		char *obj_source = (char *)file->GetData();
-		long obj_length = file->Size();
+        long obj_length = file->Size();
+        char *obj_source = (char *)file->GetData();
+        obj_length = file->Read(obj_source, obj_length);
+        if (obj_length == 0 || obj_source == NULL)
+        {
+            SLOG(errorText + fileName + " read error");
+            return false;
+        }
+        
+        for (int i = 0; i < obj_length; ++i)
+        {
+            if (obj_source[i] == '\r' || obj_source[i] == '\n')
+            {
+                obj_source[i] = 0;
+            }
+        }
 
 		char *line = obj_source;
 		char *end = obj_source + obj_length;
@@ -60,7 +77,6 @@ namespace SoftRenderer
                 }
                 if (!loadMaterial(mtlFileName))
                 {
-                    delete[] obj_source;
                     return false;
                 }
 			}
@@ -100,7 +116,6 @@ namespace SoftRenderer
         if (triangleCount <= 0)
         {
             SLOG(fileName);
-            delete[] obj_source;
             Clear();
             return false;
         }
@@ -118,7 +133,7 @@ namespace SoftRenderer
         }
 
         vec3 *normals = NULL;
-        if (normals > 0)
+        if (normalCount > 0)
         {
             normals = new vec3[normalCount];
         }
@@ -134,6 +149,9 @@ namespace SoftRenderer
 
             if (sscanf(line, "v %f %f %f", &x, &y, &z) == 3)
             {
+                x *= 0.03528;
+                y *= 0.03528;
+                z *= 0.03528;
                 positions[p++] = vec3(x, y, z);
             }
             else if (sscanf(line, "vt %f %f", &x, &y) == 2)
@@ -146,65 +164,65 @@ namespace SoftRenderer
             }
             else if (sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9) == 9)
             {
-                m_vertices[v].m_position = positions[i1 - 1];
-                m_vertices[v].m_texcoord = texcoords[i2 - 1];
-                m_vertices[v].m_normal = normals[i3 - 1];
+                m_vertices[v].position = positions[i1 - 1];
+                m_vertices[v].texcoord = texcoords[i2 - 1];
+                m_vertices[v].normal = normals[i3 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i4 - 1];
-                m_vertices[v].m_texcoord = texcoords[i5 - 1];
-                m_vertices[v].m_normal = normals[i6 - 1];
+                m_vertices[v].position = positions[i4 - 1];
+                m_vertices[v].texcoord = texcoords[i5 - 1];
+                m_vertices[v].normal = normals[i6 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i7 - 1];
-                m_vertices[v].m_texcoord = texcoords[i8 - 1];
-                m_vertices[v].m_normal = normals[i9 - 1];
+                m_vertices[v].position = positions[i7 - 1];
+                m_vertices[v].texcoord = texcoords[i8 - 1];
+                m_vertices[v].normal = normals[i9 - 1];
                 v++;
             }
             else if (sscanf(line, "f %d//%d %d//%d %d//%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
-                m_vertices[v].m_position = positions[i1 - 1];
-                m_vertices[v].m_normal = normals[i2 - 1];
+                m_vertices[v].position = positions[i1 - 1];
+                m_vertices[v].normal = normals[i2 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i3 - 1];
-                m_vertices[v].m_normal = normals[i4 - 1];
+                m_vertices[v].position = positions[i3 - 1];
+                m_vertices[v].normal = normals[i4 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i5 - 1];
-                m_vertices[v].m_normal = normals[i6 - 1];
+                m_vertices[v].position = positions[i5 - 1];
+                m_vertices[v].normal = normals[i6 - 1];
                 v++;
             }
             else if (sscanf(line, "f %d/%d %d/%d %d/%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
-                m_vertices[v].m_position = positions[i1 - 1];
-                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i1 - 1];
-                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i2 - 1];
-                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].m_normal = normals[i1 - 1];
-                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].m_normal = normals[i2 - 1];
+                m_vertices[v].position = positions[i1 - 1];
+                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i1 - 1];
+                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i2 - 1];
+                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].normal = normals[i1 - 1];
+                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].normal = normals[i2 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i3 - 1];
-                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i3 - 1];
-                if (texcoords != NULL && i4 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i4 - 1];
-                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].m_normal = normals[i3 - 1];
-                if (normals != NULL && i4 - 1 < normalCount) m_vertices[v].m_normal = normals[i4 - 1];
+                m_vertices[v].position = positions[i3 - 1];
+                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i3 - 1];
+                if (texcoords != NULL && i4 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i4 - 1];
+                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].normal = normals[i3 - 1];
+                if (normals != NULL && i4 - 1 < normalCount) m_vertices[v].normal = normals[i4 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i5 - 1];
-                if (texcoords != NULL && i5 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i5 - 1];
-                if (texcoords != NULL && i6 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i6 - 1];
-                if (normals != NULL && i5 - 1 < normalCount) m_vertices[v].m_normal = normals[i5 - 1];
-                if (normals != NULL && i6 - 1 < normalCount) m_vertices[v].m_normal = normals[i6 - 1];
+                m_vertices[v].position = positions[i5 - 1];
+                if (texcoords != NULL && i5 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i5 - 1];
+                if (texcoords != NULL && i6 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i6 - 1];
+                if (normals != NULL && i5 - 1 < normalCount) m_vertices[v].normal = normals[i5 - 1];
+                if (normals != NULL && i6 - 1 < normalCount) m_vertices[v].normal = normals[i6 - 1];
                 v++;
             }
             else if (sscanf(line, "f %d %d %d", &i1, &i2, &i3) == 3)
             {
-                m_vertices[v].m_position = positions[i1 - 1];
-                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i1 - 1];
-                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].m_normal = normals[i1 - 1];
+                m_vertices[v].position = positions[i1 - 1];
+                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i1 - 1];
+                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].normal = normals[i1 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i2 - 1];
-                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i2 - 1];
-                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].m_normal = normals[i2 - 1];
+                m_vertices[v].position = positions[i2 - 1];
+                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i2 - 1];
+                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].normal = normals[i2 - 1];
                 v++;
-                m_vertices[v].m_position = positions[i3 - 1];
-                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].m_texcoord = texcoords[i3 - 1];
-                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].m_normal = normals[i3 - 1];
+                m_vertices[v].position = positions[i3 - 1];
+                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i3 - 1];
+                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].normal = normals[i3 - 1];
                 v++;
             }
 
@@ -215,11 +233,10 @@ namespace SoftRenderer
         delete[] positions;
         delete[] normals;
         delete[] texcoords;
-        delete[] obj_source;
 
         for (int i = 0; i < m_verticeCount; ++i)
         {
-            m_vertices[i].m_color = vec3(1.f);
+            m_vertices[i].color = vec3(1.f);
         }
 
         if (normalCount <= 0)
@@ -229,14 +246,14 @@ namespace SoftRenderer
             {
                 int i0 = i, i1 = i + 1, i2 = i + 2;
 
-                a = m_vertices[i0].m_position - m_vertices[i1].m_position;
-                b = m_vertices[i2].m_position - m_vertices[i0].m_position;
+                a = m_vertices[i0].position - m_vertices[i1].position;
+                b = m_vertices[i2].position - m_vertices[i0].position;
 
                 normal = normalize(cross(a, b));
 
-                m_vertices[i0].m_normal = normal;
-                m_vertices[i1].m_normal = normal;
-                m_vertices[i2].m_normal = normal;
+                m_vertices[i0].normal = normal;
+                m_vertices[i1].normal = normal;
+                m_vertices[i2].normal = normal;
             }
         }
 
@@ -247,7 +264,7 @@ namespace SoftRenderer
     {
         for (int i = 0; i < m_verticeCount; ++i)
         {
-            m_vertices[i].m_position += deltaPos;
+            m_vertices[i].position += deltaPos;
         }
     }
 
@@ -255,7 +272,7 @@ namespace SoftRenderer
     {
         for (int i = 0; i < m_verticeCount; ++i)
         {
-            m_vertices[i].m_position *= scaleFactor;
+            m_vertices[i].position *= scaleFactor;
         }
     }
 
@@ -265,7 +282,7 @@ namespace SoftRenderer
 
         for (int i = 0; i < m_verticeCount; ++i)
         {
-            m_vertices[i].m_position = rotationMatrix * m_vertices[i].m_position;
+            m_vertices[i].position = rotationMatrix * m_vertices[i].position;
         }
     }
 
@@ -311,24 +328,37 @@ namespace SoftRenderer
 				(*source)[i] = 0;
 			}
 		}
+
+        return true;
     }
 
     bool Object::loadMaterial(const char *mtlFileName)
     {
-        char *mtl_source;
-        long mtl_length;
-
         std::shared_ptr<IFile> file = ResourceManager::Instance()->OpenFile(mtlFileName);
         if (!file)
         {
             return false;
         }
 
-        mtl_source = (char *)file->GetData();
-        mtl_length = file->Size();
+        long mtl_length = file->Size();
+        char *mtl_source = (char *)file->GetData();
+        mtl_length = file->Read(mtl_source, mtl_length);
+        if (mtl_length == 0 || mtl_source == NULL)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < mtl_length; ++i)
+        {
+            if (mtl_source[i] == '\r' || mtl_source[i] == '\n')
+            {
+                mtl_source[i] = 0;
+            }
+        }
 
         bool success = true;
 
+        //TODO 只有解析了map_Ka
         char *line = mtl_source;
         char *end = mtl_source + mtl_length;
         while (line < end)
@@ -339,7 +369,7 @@ namespace SoftRenderer
             }
 
             std::string temp(line, 6);
-            if (temp.compare("map_ka") == 0 && (line[6] == ' ' || line[6] == '\t'))
+            if (temp.compare("map_Ka") == 0 && (line[6] == ' ' || line[6] == '\t'))
             {
                 char *textureFileName = line + 6;
                 while (textureFileName < end && (*textureFileName == ' ' || *textureFileName == '\t'))
@@ -360,7 +390,6 @@ namespace SoftRenderer
             }
         }
 
-        delete[] mtl_source;
         return success;
     }
 

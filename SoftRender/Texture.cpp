@@ -49,7 +49,7 @@ namespace SoftRenderer {
 		FIBITMAP *dib = NULL;
 		if (FreeImage_FIFSupportsReading(image_format))
 		{
-			dib = FreeImage_Load(image_format, textureFileName);
+			dib = FreeImage_Load(image_format, path.c_str());
 		}
 
 		if (NULL == dib)

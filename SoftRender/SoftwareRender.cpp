@@ -3,11 +3,12 @@
 #include <assert.h>
 #include <algorithm>
 #include <iostream>
-#include "Texture.h"
 #include "Light.h"
 #include "RenderBuffer.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "Object.h"
+#include "Material.h"
 
 namespace SoftRenderer
 {
@@ -110,6 +111,11 @@ namespace SoftRenderer
         m_texture = texture;
     }
 
+    void SoftwareRender::SetMaterial(Material *material)
+    {
+        m_material = material;
+    }
+
     void SoftwareRender::SetShader(Shader *shader)
     {
         m_shader = shader;
@@ -118,6 +124,11 @@ namespace SoftRenderer
     void SoftwareRender::SetRenderState(const SoftwareRenderState &state)
     {
         m_renderState = state;
+    }
+
+    void SoftwareRender::SetSampleState(const SamplerState &state)
+    {
+        m_samplerState = state;
     }
 
     void SoftwareRender::Render(RenderBuffer *buffer)
@@ -179,6 +190,58 @@ namespace SoftRenderer
                 //光栅化
                 rasterizeTriangle(&a, &b, &c);
             }
+        }
+    }
+
+    void SoftwareRender::Render(Object *object)
+    {
+        if (NULL == object || object->m_verticeCount <= 0)
+        {
+            return;
+        }
+
+        int endIndex = 0 + object->m_verticeCount / 3 * 3;
+        
+        //vertex shader
+        m_rasterVertexBuffer.resize(endIndex);
+        for (int i = 0; i < endIndex; ++i)
+        {
+            vertexShader(&m_rasterVertexBuffer[i], &object->m_vertices[i]);
+        }
+
+        //fragment shader
+        SetTexture(&object->m_texture);
+        RasterizerVertex a, b, c;
+        for (int i = 0; i < endIndex / 3; i += 3)
+        {
+            a = m_rasterVertexBuffer[i * 3 + 0];
+            b = m_rasterVertexBuffer[i * 3 + 1];
+            c = m_rasterVertexBuffer[i * 3 + 2];
+
+            //背面剔除
+            if (cullBackFace(&a, &b, &c))
+            {
+                //continue;
+            }
+
+            //视口变化：透视除法，屏幕映射
+            a.position.x /= a.position.w;
+            a.position.y /= a.position.w;
+            b.position.x /= b.position.w;
+            b.position.y /= b.position.w;
+            c.position.x /= c.position.w;
+            c.position.y /= c.position.w;
+
+            //透视除法之后 点在cvv中 范围为-1 ~ 1 注意屏幕坐标和y坐标相反
+            a.position.x = (a.position.x + 1) / 2 * m_width;
+            a.position.y = (1 - a.position.y) / 2 * m_height;
+            b.position.x = (b.position.x + 1) / 2 * m_width;
+            b.position.y = (1 - b.position.y) / 2 * m_height;
+            c.position.x = (c.position.x + 1) / 2 * m_width;
+            c.position.y = (1 - c.position.y) / 2 * m_height;
+
+            //光栅化
+            rasterizeTriangle(&a, &b, &c);
         }
     }
 
@@ -641,11 +704,24 @@ namespace SoftRenderer
 
     void SoftwareRender::vertexShader(RasterizerVertex *v_out, const Vertex *v_in)
     {
+        //设置shader状态
+        m_shader->SetWorldMatrix(m_worldMatrix);
+        m_shader->SetViewMatrix(m_viewMatrix);
+        m_shader->SetProjMatrix(m_projMatrix);
         m_shader->VertexShader(v_out, v_in);
     }
 
     bool SoftwareRender::fragmentShader(RasterizerVertex *v)
     {
+        //设置shader状态
+        m_shader->SetSampleState(m_samplerState);
+        m_shader->SetLight(m_light);
+        m_shader->SetMaterial(m_material);
+        if (NULL != m_camera)
+        {
+            m_shader->SetCameraPosition(m_camera->m_position);
+        }
+        m_shader->SetTexture(m_texture);
         return m_shader->FragmentShader(v);
     }
 
