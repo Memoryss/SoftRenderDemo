@@ -5,12 +5,24 @@
 
 namespace SoftRenderer {
 
+    struct Material;
+
     struct Vertex
     {
         vec3 position;
         vec3 normal;
         vec4 color;
         vec2 texcoord;
+    };
+
+    //TODO只支持三角形
+    struct Face
+    {
+        std::vector<int> m_posIndices;
+        std::vector<int> m_normalIndices;
+        std::vector<int> m_texcoordIndices;
+
+        Material *m_material;
     };
 
     struct RasterizerVertex

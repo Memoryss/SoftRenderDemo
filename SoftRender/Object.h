@@ -1,13 +1,15 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
 
+#include <vector>
+
 #include "type.h"
 #include "Texture.h"
+#include "Vertex.h"
+#include "Material.h"
 
 namespace SoftRenderer
 {
-    struct Vertex;
-
     struct Triangle
     {
         vec4 m_positions[3];
@@ -40,8 +42,17 @@ namespace SoftRenderer
 
     public:
         Texture m_texture; //TODO 暂时只有map_ka 纹理
-        Vertex *m_vertices{ NULL };
-        int m_verticeCount{ 0 };
+        //Vertex *m_vertices{ NULL };
+        //int m_verticeCount{ 0 };
+        //int *m_indices{ NULL };
+        //int m_indiceCount{ 0 };
+
+        //std::vector<Vertex> m_vertices; //顶点
+        std::vector<vec3> m_positions;
+        std::vector<vec3> m_normals;
+        std::vector<vec2> m_texcoods;
+        std::vector<Face> m_faces;
+        std::vector<Material> m_materials;
     };
 }
 

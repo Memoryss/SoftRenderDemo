@@ -12,6 +12,13 @@ namespace SoftRenderer
         vec3 diffuse{ 1.f, 1.f, 1.f };   //  漫反射
         vec3 specular{ 0.f, 0.f, 0.f };  //  镜面反射
         float specularPower{ 40 };    // 镜面反射强度
+
+        std::string diffuseTextureName;
+        std::string specularTextureName;
+        std::string ambientTextureName;
+        std::string emissiveTextureName;
+        float m_alpha{ 1.f };
+        float m_shineness{ 1.f };
     };
 }
 

@@ -53,12 +53,10 @@ namespace SoftRenderer
 		char *line = obj_source;
 		char *end = obj_source + obj_length;
 
-        int positionCount = 0;
-        int texcoordCount = 0;
-        int normalCount = 0;
-        int triangleCount = 0;
         float x, y, z;
         int i1, i2, i3, i4, i5, i6, i7, i8, i9;
+
+        Material *material;
 
 		while (line < end)
 		{
@@ -79,181 +77,80 @@ namespace SoftRenderer
                 {
                     return false;
                 }
+                material = &m_materials[m_materials.size() - 1];
 			}
             else if (sscanf(line, "v %f %f %f", &x, &y, &z) == 3)
             {
-                ++positionCount;
+                m_positions.push_back(vec3(x, y, z));
             }
             else if (sscanf(line, "vt %f %f", &x, &y) == 2)
             {
-                ++texcoordCount;
+                m_texcoods.push_back(vec2(x, y));
             }
             else if (sscanf(line, "vn %f %f %f", &x, &y, &z) == 3)
             {
-                ++normalCount;
+                m_normals.push_back(vec3(x, y, z));
             }
             else if (sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9) == 9)
             {
-                ++triangleCount;
+                Face face;
+                face.m_posIndices.push_back(i1);
+                face.m_posIndices.push_back(i2);
+                face.m_posIndices.push_back(i3);
+                face.m_texcoordIndices.push_back(i4);
+                face.m_texcoordIndices.push_back(i5);
+                face.m_texcoordIndices.push_back(i6);
+                face.m_normalIndices.push_back(i7);
+                face.m_normalIndices.push_back(i8);
+                face.m_normalIndices.push_back(i9);
+                face.m_material = material;
             }
             else if (sscanf(line, "f %d//%d %d//%d %d//%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
-                ++triangleCount;
+                //TODO
             }
             else if (sscanf(line, "f %d/%d %d/%d %d/%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
-                ++triangleCount;
+                //TODO
             }
             else if (sscanf(line, "f %d %d %d", &i1, &i2, &i3) == 3)
             {
-                ++triangleCount;
+                Face face;
+                face.m_posIndices.push_back(i1);
+                face.m_posIndices.push_back(i2);
+                face.m_posIndices.push_back(i3);
+                face.m_material = material;
             }
 
             while (line < end && *line != 0) ++line;
             while (line < end && *line == 0) ++line;
 		}
 
-        if (triangleCount <= 0)
+        if (m_positions.size() <= 0)
         {
             SLOG(fileName);
             Clear();
             return false;
         }
 
-        vec3 *positions = NULL;
-        if (positionCount > 0)
-        {
-            positions = new vec3[positionCount];
-        }
-
-        vec2 *texcoords = NULL;
-        if (texcoordCount > 0)
-        {
-            texcoords = new vec2[texcoordCount];
-        }
-
-        vec3 *normals = NULL;
-        if (normalCount > 0)
-        {
-            normals = new vec3[normalCount];
-        }
-
-        m_verticeCount = triangleCount * 3;
-        m_vertices = new Vertex[m_verticeCount];
-
-        line = obj_source;
-        int p = 0, tc = 0, n = 0, v = 0;
-        while (line < end)
-        {
-            while (line < end && (*line == ' ' || *line == '\t')) line++;
-
-            if (sscanf(line, "v %f %f %f", &x, &y, &z) == 3)
-            {
-                x *= 0.03528;
-                y *= 0.03528;
-                z *= 0.03528;
-                positions[p++] = vec3(x, y, z);
-            }
-            else if (sscanf(line, "vt %f %f", &x, &y) == 2)
-            {
-                texcoords[tc++] = vec2(x, y);
-            }
-            else if (sscanf(line, "vn %f %f %f", &x, &y, &z) == 3)
-            {
-                normals[n++] = normalize(vec3(x, y, z));
-            }
-            else if (sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9) == 9)
-            {
-                m_vertices[v].position = positions[i1 - 1];
-                m_vertices[v].texcoord = texcoords[i2 - 1];
-                m_vertices[v].normal = normals[i3 - 1];
-                v++;
-                m_vertices[v].position = positions[i4 - 1];
-                m_vertices[v].texcoord = texcoords[i5 - 1];
-                m_vertices[v].normal = normals[i6 - 1];
-                v++;
-                m_vertices[v].position = positions[i7 - 1];
-                m_vertices[v].texcoord = texcoords[i8 - 1];
-                m_vertices[v].normal = normals[i9 - 1];
-                v++;
-            }
-            else if (sscanf(line, "f %d//%d %d//%d %d//%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
-            {
-                m_vertices[v].position = positions[i1 - 1];
-                m_vertices[v].normal = normals[i2 - 1];
-                v++;
-                m_vertices[v].position = positions[i3 - 1];
-                m_vertices[v].normal = normals[i4 - 1];
-                v++;
-                m_vertices[v].position = positions[i5 - 1];
-                m_vertices[v].normal = normals[i6 - 1];
-                v++;
-            }
-            else if (sscanf(line, "f %d/%d %d/%d %d/%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
-            {
-                m_vertices[v].position = positions[i1 - 1];
-                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i1 - 1];
-                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i2 - 1];
-                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].normal = normals[i1 - 1];
-                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].normal = normals[i2 - 1];
-                v++;
-                m_vertices[v].position = positions[i3 - 1];
-                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i3 - 1];
-                if (texcoords != NULL && i4 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i4 - 1];
-                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].normal = normals[i3 - 1];
-                if (normals != NULL && i4 - 1 < normalCount) m_vertices[v].normal = normals[i4 - 1];
-                v++;
-                m_vertices[v].position = positions[i5 - 1];
-                if (texcoords != NULL && i5 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i5 - 1];
-                if (texcoords != NULL && i6 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i6 - 1];
-                if (normals != NULL && i5 - 1 < normalCount) m_vertices[v].normal = normals[i5 - 1];
-                if (normals != NULL && i6 - 1 < normalCount) m_vertices[v].normal = normals[i6 - 1];
-                v++;
-            }
-            else if (sscanf(line, "f %d %d %d", &i1, &i2, &i3) == 3)
-            {
-                m_vertices[v].position = positions[i1 - 1];
-                if (texcoords != NULL && i1 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i1 - 1];
-                if (normals != NULL && i1 - 1 < normalCount) m_vertices[v].normal = normals[i1 - 1];
-                v++;
-                m_vertices[v].position = positions[i2 - 1];
-                if (texcoords != NULL && i2 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i2 - 1];
-                if (normals != NULL && i2 - 1 < normalCount) m_vertices[v].normal = normals[i2 - 1];
-                v++;
-                m_vertices[v].position = positions[i3 - 1];
-                if (texcoords != NULL && i3 - 1 < texcoordCount) m_vertices[v].texcoord = texcoords[i3 - 1];
-                if (normals != NULL && i3 - 1 < normalCount) m_vertices[v].normal = normals[i3 - 1];
-                v++;
-            }
-
-            while (line < end && *line != 0) line++;
-            while (line < end && *line == 0) line++;
-        }
-
-        delete[] positions;
-        delete[] normals;
-        delete[] texcoords;
-
-        for (int i = 0; i < m_verticeCount; ++i)
-        {
-            m_vertices[i].color = vec3(1.f);
-        }
-
-        if (normalCount <= 0)
+        //如果没有法线 需要手动计算
+        if (m_normals.size() <= 0)
         {
             vec3 a, b, normal;
-            for (int i = 0; i < m_verticeCount; i += 3)
+            //TODO 只支持三角形
+            for (int i = 0; i < m_faces.size(); ++i)
             {
                 int i0 = i, i1 = i + 1, i2 = i + 2;
 
-                a = m_vertices[i0].position - m_vertices[i1].position;
-                b = m_vertices[i2].position - m_vertices[i0].position;
+                a = m_positions[m_faces[i].m_posIndices[0]] - m_positions[m_faces[i].m_posIndices[1]];
+                b = m_positions[m_faces[i].m_posIndices[2]] - m_positions[m_faces[i].m_posIndices[0]];
 
                 normal = normalize(cross(a, b));
 
-                m_vertices[i0].normal = normal;
-                m_vertices[i1].normal = normal;
-                m_vertices[i2].normal = normal;
+                m_normals.push_back(normal);
+                m_faces[i].m_normalIndices.push_back(m_normals.size() - 1);
+                m_faces[i].m_normalIndices.push_back(m_normals.size() - 1);
+                m_faces[i].m_normalIndices.push_back(m_normals.size() - 1);
             }
         }
 
@@ -262,17 +159,17 @@ namespace SoftRenderer
 
     void Object::Translation(const vec3 &deltaPos)
     {
-        for (int i = 0; i < m_verticeCount; ++i)
+        for (int i = 0; i < m_positions.size(); ++i)
         {
-            m_vertices[i].position += deltaPos;
+            m_positions[i] += deltaPos;
         }
     }
 
     void Object::Scale(float scaleFactor)
     {
-        for (int i = 0; i < m_verticeCount; ++i)
+        for (int i = 0; i < m_positions.size(); ++i)
         {
-            m_vertices[i].position *= scaleFactor;
+            m_positions[i] *= scaleFactor;
         }
     }
 
@@ -280,9 +177,14 @@ namespace SoftRenderer
     {
         mat3x3 rotationMatrix = mat3x3(rotate(angle, axis));
 
-        for (int i = 0; i < m_verticeCount; ++i)
+        for (int i = 0; i < m_positions.size(); ++i)
         {
-            m_vertices[i].position = rotationMatrix * m_vertices[i].position;
+            m_positions[i] = rotationMatrix * m_positions[i];
+        }
+
+        for (int i = 0; i < m_normals.size(): ++i)
+        {
+            m_normals[i] = rotationMatrix * m_normals[i];
         }
     }
 
@@ -290,13 +192,11 @@ namespace SoftRenderer
     {
         m_texture.Clear();
 
-        if (NULL != m_vertices)
-        {
-            delete[] m_vertices;
-        }
-
-        m_vertices = NULL;
-        m_verticeCount = 0;
+        m_positions.clear();
+        m_texcoods.clear();
+        m_normals.clear();
+        m_materials.clear();
+        m_faces.clear();
     }
 
     bool Object::loadResource(const char *dir, const char *fileName, char **source, long length)
@@ -356,9 +256,8 @@ namespace SoftRenderer
             }
         }
 
-        bool success = true;
+        Material material;
 
-        //TODO 只有解析了map_Ka
         char *line = mtl_source;
         char *end = mtl_source + mtl_length;
         while (line < end)
@@ -368,16 +267,47 @@ namespace SoftRenderer
                 ++line;
             }
 
-            std::string temp(line, 6);
-            if (temp.compare("map_Ka") == 0 && (line[6] == ' ' || line[6] == '\t'))
+            char name[100] = {0};
+            float x, y, z;
+            if (sscanf(line, "Ka %f %f %f", &x, &y, &z) == 3)
             {
-                char *textureFileName = line + 6;
-                while (textureFileName < end && (*textureFileName == ' ' || *textureFileName == '\t'))
-                {
-                    ++textureFileName;
-                }
-
-                success = m_texture.LoadTexture(textureFileName);
+                material.ambient = vec3(x, y, z);
+            }
+            else if (sscanf(line, "Kd %f %f %f", &x, &y, &z) == 3)
+            {
+                material.diffuse = vec3(x, y, z);
+            }
+            else if (sscanf(line, "Ks %f %f %f", &x, &y, &z) == 3)
+            {
+                material.specular = vec3(x, y, z);
+            }
+            else if (sscanf(line, "Ke %f %f %f", &x, &y, &z) == 3)
+            {
+                material.emissive = vec3(x, y, z);
+            }
+            else if (sscanf(line, "map_Ka %[^\n]", &name) == 1)
+            {
+                material.ambientTextureName = name;
+            }
+            else if (sscanf(line, "map_Kd %[^\n]", &name) == 1)
+            {
+                material.diffuseTextureName = name;
+            }
+            else if (sscanf(line, "map_Ke %[^\n]", &name) == 1)
+            {
+                material.ambientTextureName = name;
+            }
+            else if (sscanf(line, "map_Ks %[^\n]", &name) == 1)
+            {
+                material.ambientTextureName = name;
+            }
+            else if (sscanf(line, "d %f", &x) == 1)
+            {
+                material.m_alpha = x;
+            }
+            else if (sscanf(line, "Ns %f", &x) == 1)
+            {
+                material.m_shineness = x;
             }
 
             while (line < end && *line != 0)
@@ -390,7 +320,8 @@ namespace SoftRenderer
             }
         }
 
-        return success;
+        m_materials.push_back(material);
+        return true;
     }
 
 }

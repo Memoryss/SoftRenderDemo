@@ -160,6 +160,7 @@
     <ClInclude Include="SoftwareRenderContext.h" />
     <ClInclude Include="SoftwareRenderState.h" />
     <ClInclude Include="SoftwareRenderApp.h" />
+    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="SoftwareRender.cpp" />
     <ClCompile Include="SoftwareRenderContext.cpp" />
     <ClCompile Include="SoftwareRenderState.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="type.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>

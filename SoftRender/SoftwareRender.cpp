@@ -195,24 +195,30 @@ namespace SoftRenderer
 
     void SoftwareRender::Render(Object *object)
     {
-        if (NULL == object || object->m_verticeCount <= 0)
+        if (NULL == object || object->m_faces.size() <= 0)
         {
             return;
         }
 
-        int endIndex = 0 + object->m_verticeCount / 3 * 3;
+        int faceCount = object->m_faces.size();
         
         //vertex shader
-        m_rasterVertexBuffer.resize(endIndex);
-        for (int i = 0; i < endIndex; ++i)
+        m_rasterVertexBuffer.resize(faceCount * 3);
+        for (int i = 0; i < faceCount; ++i)
         {
-            vertexShader(&m_rasterVertexBuffer[i], &object->m_vertices[i]);
+            for (int j = 0; j < 3; ++j)
+            {
+                Vertex v;
+                v.position = object->m_positions[object->m_faces[i].m_posIndices[j]];
+                v.normal = object->m_normals[object->m_faces[i].m_normalIndices[j]];
+                v.texcoord = object->m_texcoods[object->m_faces[i].m_texcoordIndices[j]];
+                vertexShader(&m_rasterVertexBuffer[i * 3 + j], &v);
+            }
         }
 
         //fragment shader
-        SetTexture(&object->m_texture);
         RasterizerVertex a, b, c;
-        for (int i = 0; i < endIndex / 3; i += 3)
+        for (int i = 0; i < faceCount; ++i)
         {
             a = m_rasterVertexBuffer[i * 3 + 0];
             b = m_rasterVertexBuffer[i * 3 + 1];
