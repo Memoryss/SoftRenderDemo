@@ -211,14 +211,17 @@ namespace SoftRenderer
                 Vertex v;
                 v.position = object->m_positions[object->m_faces[i].m_posIndices[j]];
                 v.normal = object->m_normals[object->m_faces[i].m_normalIndices[j]];
-                v.texcoord = object->m_texcoods[object->m_faces[i].m_texcoordIndices[j]];
+                if (object->m_texcoods.size() > 0)
+                {
+                    v.texcoord = object->m_texcoods[object->m_faces[i].m_texcoordIndices[j]];
+                }
                 vertexShader(&m_rasterVertexBuffer[i * 3 + j], &v);
             }
         }
-
+        int x = 0;
         //fragment shader
         RasterizerVertex a, b, c;
-        for (int i = 0; i < faceCount; ++i)
+        for (int i = 18; i < 36; ++i)
         {
             a = m_rasterVertexBuffer[i * 3 + 0];
             b = m_rasterVertexBuffer[i * 3 + 1];
@@ -227,9 +230,9 @@ namespace SoftRenderer
             //背面剔除
             if (cullBackFace(&a, &b, &c))
             {
-                //continue;
+                continue;
             }
-
+            ++x;
             //视口变化：透视除法，屏幕映射
             a.position.x /= a.position.w;
             a.position.y /= a.position.w;
@@ -246,9 +249,16 @@ namespace SoftRenderer
             c.position.x = (c.position.x + 1) / 2 * m_width;
             c.position.y = (1 - c.position.y) / 2 * m_height;
 
+            m_material = object->m_faces[i].m_material;
+            if (NULL == m_material)
+            {
+                m_material = new Material;
+            }
             //光栅化
             rasterizeTriangle(&a, &b, &c);
         }
+
+        x = x + 1;
     }
 
     void SoftwareRender::Begin()
@@ -727,7 +737,7 @@ namespace SoftRenderer
         {
             m_shader->SetCameraPosition(m_camera->m_position);
         }
-        m_shader->SetTexture(m_texture);
+        //m_shader->SetTexture(m_texture);
         return m_shader->FragmentShader(v);
     }
 

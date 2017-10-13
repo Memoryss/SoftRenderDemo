@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "Light.h"
 #include "Object.h"
+#include "TextureManager.h"
 
 #include <algorithm>
 #include <iostream>
@@ -235,7 +236,7 @@ public:
     virtual bool FragmentShader(RasterizerVertex *v_io)
     {
         //blinn-phong模型
-        if (NULL != m_light && NULL != m_material)
+        if (NULL != m_light)
         {
             vec3 N, L, V, H, S;
             float ka, kd, ks; //ka 衰减系数  Kd 漫反射属性 ks 镜面反射属性（半角）
@@ -250,10 +251,38 @@ public:
             V = m_camPos - worldPos;
             V = normalize(V);
             
-            vec3 emissive = m_material->emissive;
-            vec3 ambient = m_material->ambient;
-            vec3 diffuse = m_material->diffuse * m_light->m_diffuse;
-            vec3 specular = m_material->specular * m_light->m_specular;
+            vec4 diffuseColor{1.f, 1.f, 1.f, 1.f};
+            auto diffuseTexture = TextureManager::Instance()->GetTexture(m_material->diffuseTextureName);
+            if (diffuseTexture.get() != NULL)
+            {
+                diffuseTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, diffuseColor);
+            }
+            
+            vec4 ambientColor{ 1.f, 1.f, 1.f, 1.f };
+            auto ambientTexture = TextureManager::Instance()->GetTexture(m_material->ambientTextureName);
+            if (ambientTexture.get() != NULL)
+            {
+                ambientTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, ambientColor);
+            }
+
+            vec4 specularColor{ 1.f, 1.f, 1.f, 1.f };
+            auto specularTexture = TextureManager::Instance()->GetTexture(m_material->specularTextureName);
+            if (specularTexture.get() != NULL)
+            {
+                specularTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, specularColor);
+            }
+
+            vec4 emissiveColor{ 1.f, 1.f, 1.f, 1.f };
+            auto emissiveTexture = TextureManager::Instance()->GetTexture(m_material->emissiveTextureName);
+            if (emissiveTexture.get() != NULL)
+            {
+                emissiveTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, emissiveColor);
+            }
+
+            vec4 emissive = emissiveColor * vec4(m_material->emissive, 1.f);
+            vec4 ambient = ambientColor * vec4(m_material->ambient, 1.f);
+            vec4 diffuse = diffuseColor * vec4(m_material->diffuse, 1.f) * vec4(m_light->m_diffuse, 1.f);
+            vec4 specular = specularColor * vec4(m_material->specular, 1.f) * vec4(m_light->m_specular, 1.f);
             int x, y;
             switch (m_light->m_type)
             {
@@ -267,7 +296,7 @@ public:
                 kd = max(dot(N, L), 0.f);  //漫反射 法线和光线点乘
                 ks = max(dot(N, H), 0.f);  //镜面反射 半角
                 ka = 1;
-                ks = pow(ks, 20);
+                ks = pow(ks, m_material->specularPower);
                 v_io->color = emissive + (ambient + (diffuse * kd + specular * ks) * ka);
                     
                 break;
@@ -306,16 +335,16 @@ public:
             v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
         }
 
-        if (m_texture != NULL && m_texture->GetData() != NULL)
-        {
-            vec4 tex_color;
-            m_texture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, tex_color);
-            v_io->color *= tex_color;
-        }
-        else
-        {
-            v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
-        }
+//         if (m_texture != NULL && m_texture->GetData() != NULL)
+//         {
+//             vec4 tex_color;
+//             m_texture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, tex_color);
+//             v_io->color *= tex_color;
+//         }
+//         else
+//         {
+//             v_io->color = vec4(1.f, 1.f, 1.f, 1.f);
+//         }
 
         return true;
     }
@@ -351,7 +380,9 @@ public:
         {
             delete m_object;
             m_object = NULL;
+            return;
         }
+        m_object->Scale(0.035);
     }
 
     virtual void OnUpdate()

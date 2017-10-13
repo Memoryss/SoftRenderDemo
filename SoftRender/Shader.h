@@ -41,10 +41,10 @@ namespace SoftRenderer
             m_state = state;
         }
 
-        void SetTexture(Texture *texture)
-        {
-            m_texture = texture;
-        }
+//         void SetTexture(Texture *texture)
+//         {
+//             m_texture = texture;
+//         }
 
         void SetLight(Light *light)
         {
@@ -66,7 +66,6 @@ namespace SoftRenderer
         mat4x4 m_projMatrix;
         mat4x4 m_viewMatrix;
         mat4x4 m_worldMatrix;
-        Texture *m_texture{ NULL };
         SamplerState m_state;
         Light *m_light{ NULL };
         Material *m_material{ NULL };

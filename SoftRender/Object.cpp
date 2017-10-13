@@ -56,7 +56,7 @@ namespace SoftRenderer
         float x, y, z;
         int i1, i2, i3, i4, i5, i6, i7, i8, i9;
 
-        Material *material;
+        Material *material = NULL;
 
 		while (line < end)
 		{
@@ -94,16 +94,17 @@ namespace SoftRenderer
             else if (sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8, &i9) == 9)
             {
                 Face face;
-                face.m_posIndices.push_back(i1);
-                face.m_posIndices.push_back(i2);
-                face.m_posIndices.push_back(i3);
-                face.m_texcoordIndices.push_back(i4);
-                face.m_texcoordIndices.push_back(i5);
-                face.m_texcoordIndices.push_back(i6);
-                face.m_normalIndices.push_back(i7);
-                face.m_normalIndices.push_back(i8);
-                face.m_normalIndices.push_back(i9);
+                face.m_posIndices.push_back(i1 - 1);
+                face.m_posIndices.push_back(i2 - 1);
+                face.m_posIndices.push_back(i3 - 1);
+                face.m_texcoordIndices.push_back(i4 - 1);
+                face.m_texcoordIndices.push_back(i5 - 1);
+                face.m_texcoordIndices.push_back(i6 - 1);
+                face.m_normalIndices.push_back(i7 - 1);
+                face.m_normalIndices.push_back(i8 - 1);
+                face.m_normalIndices.push_back(i9 - 1);
                 face.m_material = material;
+                m_faces.push_back(face);
             }
             else if (sscanf(line, "f %d//%d %d//%d %d//%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
@@ -116,10 +117,11 @@ namespace SoftRenderer
             else if (sscanf(line, "f %d %d %d", &i1, &i2, &i3) == 3)
             {
                 Face face;
-                face.m_posIndices.push_back(i1);
-                face.m_posIndices.push_back(i2);
-                face.m_posIndices.push_back(i3);
+                face.m_posIndices.push_back(i1 - 1);
+                face.m_posIndices.push_back(i2 - 1);
+                face.m_posIndices.push_back(i3 - 1);
                 face.m_material = material;
+                m_faces.push_back(face);
             }
 
             while (line < end && *line != 0) ++line;
@@ -142,7 +144,7 @@ namespace SoftRenderer
             {
                 int i0 = i, i1 = i + 1, i2 = i + 2;
 
-                a = m_positions[m_faces[i].m_posIndices[0]] - m_positions[m_faces[i].m_posIndices[1]];
+                a = m_positions[m_faces[i].m_posIndices[1]] - m_positions[m_faces[i].m_posIndices[0]];
                 b = m_positions[m_faces[i].m_posIndices[2]] - m_positions[m_faces[i].m_posIndices[0]];
 
                 normal = normalize(cross(a, b));
@@ -182,7 +184,7 @@ namespace SoftRenderer
             m_positions[i] = rotationMatrix * m_positions[i];
         }
 
-        for (int i = 0; i < m_normals.size(): ++i)
+        for (int i = 0; i < m_normals.size(); ++i)
         {
             m_normals[i] = rotationMatrix * m_normals[i];
         }

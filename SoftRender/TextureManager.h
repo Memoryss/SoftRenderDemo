@@ -16,6 +16,7 @@ namespace SoftRenderer {
 
         static TextureManager * Instance();
 
+        std::shared_ptr<Texture> GetTexture(const std::string &name);
 
     private:
         TextureManager();
@@ -23,7 +24,7 @@ namespace SoftRenderer {
     private:
         static TextureManager *s_instance;
 
-        std::map<std::string, Texture *> m_textures;
+        std::map<std::string, std::shared_ptr<Texture>> m_textures;
     };
 
 }
