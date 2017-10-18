@@ -9,6 +9,7 @@
 #include "Shader.h"
 #include "Object.h"
 #include "Material.h"
+#include "TextureManager.h"
 
 namespace SoftRenderer
 {
@@ -213,7 +214,8 @@ namespace SoftRenderer
                 v.normal = object->m_normals[object->m_faces[i].m_normalIndices[j]];
                 if (object->m_texcoods.size() > 0)
                 {
-                    v.texcoord = object->m_texcoods[object->m_faces[i].m_texcoordIndices[j]];
+                    int index = object->m_faces[i].m_texcoordIndices[j];
+                    v.texcoord = object->m_texcoods[index];
                 }
                 vertexShader(&m_rasterVertexBuffer[i * 3 + j], &v);
             }
@@ -221,7 +223,7 @@ namespace SoftRenderer
         int x = 0;
         //fragment shader
         RasterizerVertex a, b, c;
-        for (int i = 18; i < 36; ++i)
+        for (int i = 0; i < faceCount; ++i)
         {
             a = m_rasterVertexBuffer[i * 3 + 0];
             b = m_rasterVertexBuffer[i * 3 + 1];
@@ -255,6 +257,18 @@ namespace SoftRenderer
                 m_material = new Material;
             }
             //¹âÕ¤»¯
+            //ÉèÖÃshader×´Ì¬
+            m_shader->SetSampleState(m_samplerState);
+            m_shader->SetLight(m_light);
+            m_shader->SetMaterial(m_material);
+            if (NULL != m_camera)
+            {
+                m_shader->SetCameraPosition(m_camera->m_position);
+            }
+            m_shader->SetTexture(Shader::DIFFUSE, TextureManager::Instance()->GetTexture(m_material->diffuseTextureName).get());
+            m_shader->SetTexture(Shader::SPECULAR, TextureManager::Instance()->GetTexture(m_material->specularTextureName).get());
+            m_shader->SetTexture(Shader::EMISSIVE, TextureManager::Instance()->GetTexture(m_material->emissiveTextureName).get());
+            m_shader->SetTexture(Shader::AMBIENT, TextureManager::Instance()->GetTexture(m_material->ambientTextureName).get());
             rasterizeTriangle(&a, &b, &c);
         }
 
@@ -674,7 +688,7 @@ namespace SoftRenderer
 				}
 
 				int start_x = max(x1, 0);
-				int end_x = min(x2, m_height);
+				int end_x = min(x2, m_width);
 				for (int x = start_x; x < end_x; ++x)
 				{
 					float ratio_x1x2 = (x2 - x1) > 0 ? (float)(x - x1) / (x2 - x1) : 1;
@@ -729,15 +743,6 @@ namespace SoftRenderer
 
     bool SoftwareRender::fragmentShader(RasterizerVertex *v)
     {
-        //ÉèÖÃshader×´Ì¬
-        m_shader->SetSampleState(m_samplerState);
-        m_shader->SetLight(m_light);
-        m_shader->SetMaterial(m_material);
-        if (NULL != m_camera)
-        {
-            m_shader->SetCameraPosition(m_camera->m_position);
-        }
-        //m_shader->SetTexture(m_texture);
         return m_shader->FragmentShader(v);
     }
 

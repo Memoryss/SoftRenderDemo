@@ -251,30 +251,30 @@ public:
             V = m_camPos - worldPos;
             V = normalize(V);
             
-            vec4 diffuseColor{1.f, 1.f, 1.f, 1.f};
-            auto diffuseTexture = TextureManager::Instance()->GetTexture(m_material->diffuseTextureName);
-            if (diffuseTexture.get() != NULL)
+            vec4 diffuseColor{0.f, 0.f, 0.f, 1.f};
+            auto diffuseTexture = m_textures[DIFFUSE];
+            if (diffuseTexture != NULL)
             {
                 diffuseTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, diffuseColor);
             }
             
-            vec4 ambientColor{ 1.f, 1.f, 1.f, 1.f };
-            auto ambientTexture = TextureManager::Instance()->GetTexture(m_material->ambientTextureName);
-            if (ambientTexture.get() != NULL)
+            vec4 ambientColor{ 0.f, 0.f, 0.f, 1.f };
+            auto ambientTexture = m_textures[AMBIENT];
+            if (m_textures[AMBIENT] != NULL)
             {
                 ambientTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, ambientColor);
             }
 
-            vec4 specularColor{ 1.f, 1.f, 1.f, 1.f };
-            auto specularTexture = TextureManager::Instance()->GetTexture(m_material->specularTextureName);
-            if (specularTexture.get() != NULL)
+            vec4 specularColor{ 0.f, 0.f, 0.f, 1.f };
+            auto specularTexture = m_textures[AMBIENT];
+            if (specularTexture != NULL)
             {
                 specularTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, specularColor);
             }
 
-            vec4 emissiveColor{ 1.f, 1.f, 1.f, 1.f };
-            auto emissiveTexture = TextureManager::Instance()->GetTexture(m_material->emissiveTextureName);
-            if (emissiveTexture.get() != NULL)
+            vec4 emissiveColor{ 0.f, 0.f, 0.f, 1.f };
+            auto emissiveTexture = m_textures[EMISSIVE];
+            if (emissiveTexture != NULL)
             {
                 emissiveTexture->Sample2D(v_io->texcoord.x, v_io->texcoord.y, m_state, emissiveColor);
             }
@@ -376,13 +376,13 @@ public:
         //createSphere(m_renderBuffer, 1, 30, 30);
         //m_texture->LoadTexture("X1.png");
         m_object = new Object;
-        if (!m_object->Load("dodecahedron.obj"))
+        if (!m_object->Load("thor.obj"))
         {
             delete m_object;
             m_object = NULL;
             return;
         }
-        m_object->Scale(0.035);
+        m_object->Scale(0.043749999);
     }
 
     virtual void OnUpdate()
@@ -393,11 +393,10 @@ public:
         //清空buffer
         m_render->Clear();
 
-        m_worldMatrix = rotate(M_PI  * 0.3f , vec3(0.f, 1.f, 0.f));
+        m_worldMatrix = rotate(M_PI * m_time / 3, vec3(0.f, 1.f, 0.f));
 
-        m_camera->SetPerspective(M_PI / 3, m_width / (float)m_height, 0.1f, 1000.f);
-        m_camera->Look(vec3(0, 3, -5), vec3(0, 0, 0), vec3(0, 1, 0));
-
+        m_camera->SetPerspective(M_PI / 4, m_width / (float)m_height, 0.125f, 512.f);
+        m_camera->Look(vec3(0, 0, -10), vec3(0, 0, 0), vec3(0, 1, 0));
         //设置采样
         SamplerState state;
         state.m_filter = NEAREST;
@@ -413,7 +412,7 @@ public:
         //设置灯
         Light light;
         light.m_type = DIRECTION;
-        light.m_direction = vec3(-1, -1, 1);
+        light.m_direction = vec3(0, 0, 1);
         light.m_diffuse = vec3(1.f, 1.f, 1.f);
         light.m_specular = vec3(1.f, 1.f, 1.f);
         light.m_direction = normalize(light.m_direction);
@@ -521,7 +520,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 }
 
 static const WCHAR * WIN32_CLASS_NAME = L"Myway3D";
-const int S_WIDTH = 666, S_HEIGHT = 400;
+const int S_WIDTH = 800, S_HEIGHT = 600;
 INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
     // 创建窗口

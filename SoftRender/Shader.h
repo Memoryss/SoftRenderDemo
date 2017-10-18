@@ -13,9 +13,26 @@ namespace SoftRenderer
     class SoftRender;
     class Texture;
 
+    enum TexturType
+    {
+        DIFFUSE = 0,
+        SPECULAR,
+        AMBIENT,
+        EMISSIVE,
+    };
+
     class Shader
     {
     public:
+        enum TexturType
+        {
+            DIFFUSE = 0,
+            SPECULAR,
+            AMBIENT,
+            EMISSIVE,
+            COUNT,
+        };
+
         virtual ~Shader() {}
 
         virtual void VertexShader(RasterizerVertex *v_out, const Vertex *v_in) = 0;
@@ -41,10 +58,10 @@ namespace SoftRenderer
             m_state = state;
         }
 
-//         void SetTexture(Texture *texture)
-//         {
-//             m_texture = texture;
-//         }
+        void SetTexture(TexturType type, Texture *texture)
+        {
+            m_textures[type] = texture;
+        }
 
         void SetLight(Light *light)
         {
@@ -69,6 +86,7 @@ namespace SoftRenderer
         SamplerState m_state;
         Light *m_light{ NULL };
         Material *m_material{ NULL };
+        Texture *m_textures[COUNT]{ NULL };
     };
 }
 

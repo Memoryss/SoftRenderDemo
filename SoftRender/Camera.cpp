@@ -14,6 +14,7 @@ namespace SoftRenderer
 
 	void Camera::Look(const vec3 &eye, const vec3 &center, const vec3 &up)
 	{
+        m_position = eye;
         //ππ‘Ïn
         vec3 temp = center - eye;
         m_n = normalize(temp);

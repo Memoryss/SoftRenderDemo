@@ -20,6 +20,11 @@ namespace SoftRenderer {
 
     std::shared_ptr<SoftRenderer::Texture> TextureManager::GetTexture(const std::string &name)
     {
+        if (name.empty())
+        {
+            return NULL;
+        }
+
         auto iter = m_textures.find(name);
         if (iter != m_textures.end()) {
             return iter->second;

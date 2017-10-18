@@ -95,13 +95,13 @@ namespace SoftRenderer
             {
                 Face face;
                 face.m_posIndices.push_back(i1 - 1);
-                face.m_posIndices.push_back(i2 - 1);
-                face.m_posIndices.push_back(i3 - 1);
-                face.m_texcoordIndices.push_back(i4 - 1);
+                face.m_texcoordIndices.push_back(i2 - 1);
+                face.m_normalIndices.push_back(i3 - 1);
+                face.m_posIndices.push_back(i4 - 1);
                 face.m_texcoordIndices.push_back(i5 - 1);
-                face.m_texcoordIndices.push_back(i6 - 1);
-                face.m_normalIndices.push_back(i7 - 1);
-                face.m_normalIndices.push_back(i8 - 1);
+                face.m_normalIndices.push_back(i6 - 1);
+                face.m_posIndices.push_back(i7 - 1);
+                face.m_texcoordIndices.push_back(i8 - 1);
                 face.m_normalIndices.push_back(i9 - 1);
                 face.m_material = material;
                 m_faces.push_back(face);
@@ -112,7 +112,18 @@ namespace SoftRenderer
             }
             else if (sscanf(line, "f %d/%d %d/%d %d/%d", &i1, &i2, &i3, &i4, &i5, &i6) == 6)
             {
-                //TODO
+//                 Face face;
+//                 face.m_posIndices.push_back(i1 - 1);
+//                 face.m_posIndices.push_back(i3 - 1);
+//                 face.m_posIndices.push_back(i5 - 1);
+//                 face.m_texcoordIndices.push_back(i1 - 1);
+//                 face.m_texcoordIndices.push_back(i2 - 1);
+//                 face.m_texcoordIndices.push_back(i6 - 1);
+//                 face.m_normalIndices.push_back(i7 - 1);
+//                 face.m_normalIndices.push_back(i8 - 1);
+//                 face.m_normalIndices.push_back(i9 - 1);
+//                 face.m_material = material;
+//                 m_faces.push_back(face);
             }
             else if (sscanf(line, "f %d %d %d", &i1, &i2, &i3) == 3)
             {
