@@ -1,5 +1,7 @@
 #include "App.h"
 
+#include <sstream>
+
 App::App()
 {
 
@@ -33,6 +35,16 @@ void App::Update()
     m_framTime = (curTick - lastTick) / 1000.f;
     m_time += m_framTime;
     lastTick = curTick;
+
+	float frameRate = 0;
+	if (m_framTime > 0.000001)
+	{
+		frameRate = 1.f / m_framTime;
+	}
+
+	std::wstringstream wss;
+	wss << "frame rate:" << frameRate;
+	SetWindowText(m_hwnd, wss.str().c_str());
 }
 
 void App::Stop()
