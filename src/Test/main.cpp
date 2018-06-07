@@ -370,7 +370,7 @@ public:
         m_renderBuffer = new RenderBuffer;
         m_camera = new Camera;
 
-        ResourceManager::Instance()->AddPath("../Media");
+        ResourceManager::Instance()->AddPath("Media");
         ResourceManager::Instance()->AddPath(".");
         //createBox(m_renderBuffer, 1, 1, 1);
         //createSphere(m_renderBuffer, 1, 30, 30);
@@ -519,7 +519,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
     return ::DefWindowProc(hWnd, uiMsg, wParam, lParam);
 }
 
-static const WCHAR * WIN32_CLASS_NAME = L"Myway3D";
+static const CHAR * WIN32_CLASS_NAME = "Myway3D";
 const int S_WIDTH = 800, S_HEIGHT = 600;
 INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
@@ -547,7 +547,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     int xpos = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
     int ypos = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
 
-    HWND hWnd = CreateWindow(WIN32_CLASS_NAME, L"SoftRender", style,
+    HWND hWnd = CreateWindow(WIN32_CLASS_NAME, "SoftRender", style,
         xpos, ypos, width, height,
         NULL, NULL, hInstance, NULL);
 

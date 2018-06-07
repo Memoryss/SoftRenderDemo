@@ -42,7 +42,7 @@ void App::Update()
 		frameRate = 1.f / m_framTime;
 	}
 
-	std::wstringstream wss;
+	std::stringstream wss;
 	wss << "frame rate:" << frameRate;
 	SetWindowText(m_hwnd, wss.str().c_str());
 }

@@ -9,3 +9,5 @@
 /x64/Debug
 /SoftRender/Release
 /Release
+.build
+.stage
